@@ -4,23 +4,34 @@
  * KWDS Common Functions
  */
 
+
+// Checks to see if the logged-in user has permission to add rooms
 function can_add_rooms($id) {
     $db=new db;
     $result = $db->get_kwds($_GET['kwds']);
     $n = mysql_result($result, 0, 'id');
+
     // Checks to see if you are on staff for the upcoming KWDS
     if (isset($_SESSION['user_id'])) {
         $result = $db->get_user_job($_SESSION['user_id'], $n);
+
         if (mysql_num_rows($result) > 0){
             $job=mysql_result($result, 0, 'job.id');
+
             if (($job==1 OR $job==2 OR ($job>=6 AND $job<=9))) {
                 return true;
             }
         }
     }
-    if ($id==1) { return true; }
+
+    // A super user should also be able to do this
+    if (is_super_user($id)) {
+        return true;
+    }
+
     return false;
 }
+
 
 //email validate function found here: http://www.linuxjournal.com/article/9585
 function check_email_address($email) {
@@ -65,56 +76,91 @@ function check_email_address($email) {
     return $isValid;
 }
 
+
 //Used to create a dropdown box, need list to require name and id
 function dropdown($result, $type, $select=1) {
     $row = mysql_num_rows($result);
     echo '<select name="' . $type . '">';
+    
+    // Loop through each index of the result
     for ($i = 0; $i < $row; $i++) {
         $name = mysql_result($result, $i, 'name');
         $num = mysql_result($result, $i, 'id');
         echo '<option value="' . $num . '" ';
+        
+        // Select the option if it is the same as the one selected in the database
         if ($select == $num) {
             echo 'selected="selected"';
         }
+
         echo '>' . $name . '</option>';
     }
     echo '</select>';
 }
 
+
+// Used to create a dropdown box for hour of the day
 function dropdown_hour() {
     echo'<select name="hour" class="hour">';
-    for ($i=1;$i<=12;$i++) {
+
+    // Loop 1 to 12 for AM
+    for ($i = 1; $i <= 12; $i++) {
         echo'<option value="';
-        if ($i<10) {echo '0';}
+
+        // Insert preceeding zero if less than 10
+        if ($i<10) {
+            echo '0';
+        }
+
         echo $i.'">'.$i.'am</option>';
     }
-    for ($i=1;$i<=12;$i++) {
+
+    // Loop 1 to 12 for PM
+    for ($i = 1; $i <= 12; $i++) {
         echo'<option value="';
         echo ($i+12).'">'.$i.'pm</option>';
     }
+
     echo '</select>';
 }
 
+
+// Used to create a dropdown box for numbers
 function dropdown_num($name, $start, $max, $increment=1, $index=1) {
     echo '<select name="'.$name.'" class="number">';
-    for ($i=$start;$i<=$max;$i+=$increment) {
+
+    // Loop from start to max and add the incrementer
+    for ($i = $start; $i <= $max; $i += $increment) {
         echo'<option ';
-        if ($i==$index) {echo 'selected="selected" ';}
+
+        // Select the option if it is the one that is selected in the database
+        if ($i==$index) {
+            echo 'selected="selected" ';
+        }
+
         echo'value="';
-        if ($i<10) {echo '0';}
+
+        // Add a leading zero if the number is less than 10
+        if ($i<10) {
+            echo '0';
+        }
+
         echo $i.'">'.$i.'</option>';
     }
+
     echo '</select>';
 }
+
 
 //Used to further sanitize user input
 function escape_query($str) {
     return strtr($str, array(
         "\0" => "",
-        "'"  => "&#39;",
         "\'" => "&#39;",
+        "'"  => "&#39;",
         '\"' => "&#34;",
         '"'  => "&#34;",
+        "\\\\" => "&#92;",
         "\\" => "&#92;",
         // more secure
         "<"  => "&lt;",
@@ -124,49 +170,73 @@ function escape_query($str) {
     ));
 }
 
+
 // Displays an error page
 function get_error_page($message) {
     require_once('error_page.php');
 }
 
-// Makes a list of dates that the event runs()
+
+// Makes a dropdown list of dates that the event runs
 function get_event_dates($cdate) {
     global $ksdate, $kedate;
     $begin = strtotime($ksdate);
     $end=strtotime($kedate);
     echo '<select name="date">';
+
+    // Loop until the beginning date matches the ending date
     while ($begin<=$end) {
         $display=date('l, F j, Y', $begin);
         $value=date('Y-m-d', $begin);
         echo '<option value="'.$value.'"';
-        if ($cdate==$value) { echo ' selected="selected"';}
+
+        // If the current date is the same as this date, then select it
+        if ($cdate==$value) {
+            echo ' selected="selected"';
+        }
+
         echo '>'.$display.'</option>';
         $begin+=(24*60*60);
     }
+
     echo '</select>';
 }
+
 
 // Used to verify that the current user is an autocrat (or co-autocrat) of the upcoming KWDS
 function is_autocrat($id,$n) {
     $db = new db;
+
+    // Checks to see if the user is logged in
     if (isset($_SESSION['user_id'])) {
         $result = $db->get_user_job($_SESSION['user_id'], $n);
-        if (mysql_num_rows($result) > 0 AND (mysql_result($result, 0, 'job.id')==1 OR mysql_result($result, 0, 'job.id')==2 OR mysql_result($result, 0, 'job.id')==16)) {
+
+        // If your job id# equals 1, 2, or 16 then you are an autocrat type-figure
+        if (mysql_num_rows($result) > 0 AND (mysql_result($result, 0, 'job.id')==1 
+            OR mysql_result($result, 0, 'job.id')==2 OR mysql_result($result, 0, 'job.id')==16))
+        {
             return true;
         }
     }
-    if ($id==1) { return true; }
+
+    // If you are a super user, you may also qualify
+    if (is_super_user($id)) {
+        return true;
+    }
+
     return false;
 }
+
 
 // Used to verify that the current user has access to everything
 function is_super_user() {
     if ($_SESSION['user_id']==1) {
         return true;
     }
-    return false;
 
+    return false;
 }
+
 
 // Random Character Generator
 function random_gen($length) {
@@ -176,11 +246,14 @@ function random_gen($length) {
     $char_list .= "abcdefghijklmnopqrstuvwxyz";
     $char_list .= "1234567890";
 
+    // Loop through until a number of times equal to the length
     for ($i = 0; $i < $length; $i++) {
         $random .= substr($char_list, (rand() % (strlen($char_list))), 1);
     }
+
     return $random;
 }
+
 
 // A redirection function
 function redirect($location, $page_id = '', $id = '') {
@@ -215,6 +288,7 @@ function redirect($location, $page_id = '', $id = '') {
     echo $message . ' <a href="' . $url . '">Click here to proceed</a>.';
 }
 
+
 // A function to reverse the effects of the escape_query() function
 function redisplay($str) {
     return strtr($str, array(
@@ -227,19 +301,24 @@ function redisplay($str) {
     ));
 }
 
+
 // Converts an integer to Roman numerals
 function roman($integer) {
     $integer = intval($integer);
     $result = '';
     $lookup = array('M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400, 'C' => 100, 'XC' => 90,
         'L' => 50, 'XL' => 40, 'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1);
+
+    // Loop for number replacement
     foreach ($lookup as $roman => $value) {
         $matches = intval($integer / $value);
         $result .= str_repeat($roman, $matches);
         $integer = $integer % $value;
     }
+
     return $result;
 }
+
 
 //  A function to sanitize input
 function sanit($input) {

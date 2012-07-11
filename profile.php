@@ -39,9 +39,14 @@ if (mysql_num_rows($result) == 1) {
     <ul>
         <li><label for="name">Mundane Name: </label><?php echo $pre . " " . $first . " " . $last; ?></li>
         <li><label>SCA Name: </label> <?php echo $title . " " . $sfirst . " " . $slast ?></li>
-        <li><label>Email: </label> <?php echo $email ?></li>
         <li><label>Group: </label> <a href="<?php echo $gurl ?>"><?php echo $group ?></a></li>
         <li><label>Kingdom: </label> <a href="<?php echo $kurl ?>"><?php echo $kingdom ?></a></li>
+        <li>
+            <form action="email.php" method="post">
+                <input type="hidden" name="uid" value="<?php echo $id ?>" />
+                <input type="submit" class="button float_right" value="Send an email" />
+            </form>
+        </li>
     </ul>
     <div class="bio">
         <h3>Biography:</h3>
@@ -54,7 +59,8 @@ if (mysql_num_rows($result) == 1) {
     <div class="jobs">
         <h2>KWDS Staff</h2>
         <ul>';
-            for ($i=0;$i<mysql_num_rows($result); $i++) {
+            $rows=mysql_num_rows($result);
+            for ($i=0;$i<$rows; $i++) {
                 echo '
             <li><label>KWDS '.mysql_result($result, $i, 'kwds.id').': </label> '.mysql_result($result, $i, 'job.name').'</li>';
             }
@@ -68,7 +74,8 @@ if (mysql_num_rows($result) == 1) {
     <div class="classes">
         <h2>Classes Submitted</h2>
         <ul>';
-            for ($i=0;$i<mysql_num_rows($result); $i++) {
+            $rows=mysql_num_rows($result);
+            for ($i=0;$i<$rows; $i++) {
                 echo'
             <li><a href="schedule.php?kwds='.  mysql_result($result, $i, 'kwds_id').'&id='.  mysql_result($result, $i, 'id').'"><span class="bold">KWDS '.mysql_result($result, $i, 'kwds_id').'</span>: '.mysql_result($result, $i, 'name').'</a></li>';
             }

@@ -96,14 +96,16 @@ for ($kday; $kday <= $keday; $kday++) {
         }
         echo '
     </div>';
-        for ($i = 0; $i < mysql_num_rows($result); $i++) {
+        $rows=mysql_num_rows($result);
+        for ($i = 0; $i < $rows; $i++) {
             echo'
     <div class="tr">';
             $room = $db->get_class_rooms(mysql_result($result, $i, 'room.id'), date('z', strtotime($ksdate)) + $kday + 2, $where);
             if (mysql_num_rows($room) > 0) {
                 echo'
         <div class="th">' . mysql_result($result, $i, 'name') . '</div>';
-                for ($j = 0; $j < mysql_num_rows($room); $j++) {
+                $rooms=mysql_num_rows($room);
+                for ($j = 0; $j < $rooms; $j++) {
                     //if ((isset($_POST['checkboxes']) AND $_POST['c' . mysql_result($room, $j, 'class.id')] == mysql_result($room, $j, 'class.id'))) {
                         echo '<div class="class';
                         switch (mysql_result($room, $j, 'type_id')) {

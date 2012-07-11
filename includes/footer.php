@@ -1,7 +1,11 @@
 </div>
 <div id="footer">
-    <p>Copyright &#169; <?php echo date('Y',time()); ?> <a href="http://kwds.plcengineering.net" title="Known World Dance and Music Symposium">Known World Dance and Music Symposium</a>
-        | Theme by <a href="http://www.the-cloisters.net">The Cloisters</a> | Site maintained by <a href="profile.php?id=1">Gwommy</a></p>
+    <p>
+        Copyright &#169; <?php echo date('Y',time()); ?>
+        <a href="http://kwds.plcengineering.net" title="Known World Dance and Music Symposium">Known World Dance and Music Symposium</a>
+        | Theme by <a href="http://www.the-cloisters.net">The Cloisters</a> 
+        | Site created by <a href="profile.php?id=1">Gwommy</a>
+    </p>
 </div>
 </div>
 </div>

@@ -18,7 +18,7 @@ if (isset($_SESSION['user_id']) AND can_add_rooms($_SESSION['user_id'])) {
         <li><label>Building (optional):</label> <input type="textbox" name="building" /></li>
         <li><label>Floor:</label> <?php dropdown_num('floor', 0, 10);?></li
         <li><label>Size:</label> <input type="textbox" name="size" /></li>
-        <li><label>Notes:</label> <textarea name="notes"></textarea></li>
+        <li><label>Notes:</label> <textarea name="notes" cols="50" rows="5"></textarea></li>
         <?php if (is_super_user($_SESSION['user_id'])) {
             echo'
         <li><label>KWDS:</label> <input type="number" name="kwds" value="'.$num.'" />';

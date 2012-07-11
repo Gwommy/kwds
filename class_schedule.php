@@ -104,14 +104,16 @@ for ($kday=0; $kday <= $keday; $kday++) {
         }
         echo '
     </div>';
-        for ($i = 0; $i < mysql_num_rows($result); $i++) {
+        $rows = mysql_num_rows($result);
+        for ($i = 0; $i < $rows; $i++) {
             echo'
     <div>';
             $room = $db->get_class_rooms(mysql_result($result, $i, 'room.id'), date('z', strtotime($ksdate)) + $kday + 2);
             if (mysql_num_rows($room) > 0) {
                 echo'
         <div class="th">' . mysql_result($result, $i, 'name') . '</div>';
-                for ($j = 0; $j < mysql_num_rows($room); $j++) {
+                $rooms = mysql_num_rows($room);
+                for ($j = 0; $j < $rooms; $j++) {
                     echo '<a href="class_schedule.php?kwds=' . $num . '&id=' . mysql_result($room, $j, 'class.id') . '"><div class="class';
                     switch (mysql_result($room, $j, 'type_id')) {
                         case 2:

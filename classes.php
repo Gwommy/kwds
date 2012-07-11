@@ -11,7 +11,8 @@ if (mysql_num_rows($result) < 1) {
     echo'<p>There are no classes scheduled for this event yet.</p>';
 } else {
     echo'<p>There are ' . mysql_num_rows($result) . ' classes.</p>';
-    for ($i = 0; $i < mysql_num_rows($result); $i++) {
+    $rows = mysql_num_rows($result);
+    for ($i = 0; $i < $rows; $i++) {
         $class_name = mysql_result($result, $i, 'class.name');
         $uid = mysql_result($result, $i, 'user.id');
         $sca_name = mysql_result($result, $i, 'title.name') . ' ' . mysql_result($result, $i, 'sca_first') . ' ' . mysql_result($result, $i, 'sca_last');
