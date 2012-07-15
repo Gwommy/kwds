@@ -39,7 +39,7 @@ $kzip=mysql_result($result, 0, 'zip');
 $num=mysql_result($result, 0, 'id');
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
     <head>
         <title>Known World Dance and Music Symposium</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
