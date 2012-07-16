@@ -5,7 +5,7 @@
 require_once('includes/header.php');
 
 // Make sure the user is logged in as a user that can edit the schedule
-if (!(can_add_rooms($_SESSION['user_id']) AND $num>=$db->get_kwds_number() OR is_super_user())) {
+if (!(can_add_rooms($_SESSION['user_id']) AND $kwds['id'] >= $db->get_kwds_number() OR is_super_user())) {
     echo 'div class="box error">You do not have permissions to view this page.</div>';
     redirect('index');
     include_once(includes/footer.php);
@@ -34,26 +34,26 @@ if (isset($_POST['class'])) {
 
 $cid = (isset($_GET['id'])) ? $_GET['id'] : 0;
 $result = $db->get_class($cid);
-if (mysql_num_rows($result) == 1) {
-    $class_name = mysql_result($result, 0, 'class.name');
-    $desc = redisplay(mysql_result($result, 0, 'class.description'));
-    $room = mysql_result($result, 0, 'room.name');
-    $room_id=mysql_result($result, 0, 'room.id');
-    $length = mysql_result($result, 0, 'hours');
-    /**/$hour=intval($length/60);
-    /**/$minute=$length%60;
-    $diff=mysql_result($result, 0, 'difficulty_id');
-    $aero=mysql_result($result, 0, 'aerobic_id');
-    $era=mysql_result($result, 0, 'era_id');
-    $type = mysql_result($result, 0, 'type_id');
-    $hr = date('g', (strtotime(mysql_result($result, 0, 'day'))));
-    $min = date('i', (strtotime(mysql_result($result, 0, 'day'))));
-    $uid = mysql_result($result, 0, 'user.id');
-    $cdate= date('Y-m-d', (strtotime(mysql_result($result, 0, 'day'))));
-    $sca_name = mysql_result($result, 0, 'title.name') . ' ' . mysql_result($result, 0, 'sca_first') . ' ' . mysql_result($result, 0, 'sca_last');
-    $mundane_name = mysql_result($result, 0, 'prefix.name') . ' ' . mysql_result($result, 0, 'user.first') . ' ' . mysql_result($result, 0, 'user.last');
+if (count($result) == 1) {
+    $class_name = $result['ClassName'];
+    $desc = redisplay($result['ClassDescription']);
+    $room = $result['RoomName'];
+    $room_id = $result['RoomID'];
+    $length = $result['hours'];
+    $hour = intval($length / 60);
+    $minute = $length % 60;
+    $diff = $result['DifficultyID'];
+    $aero = $result['AerobicID'];
+    $era = $result['EraID'];
+    $type = $result['type_id'];
+    $hr = date('g', (strtotime($result['day'])));
+    $min = date('i', (strtotime($result['day'])));
+    $uid = $result['UserID'];
+    $cdate= date('Y-m-d', (strtotime($result['day'])));
+    $sca_name = $result['Title'] . ' ' . $result['SCAFirst'] . ' ' . $result['SCALast'];
+    $mundane_name = $result['PrefixName'] . ' ' . $result['MundaneFirst'] . ' ' . $result['MundaneLast'];
 ?>
-<form class="form" action="class_schedule.php?kwds=<?php echo $num ?>" method="post">
+<form class="form" action="class_schedule.php?kwds=<?php echo $kwds['id'] ?>" method="post">
 <div class="class_info">
     <ul>
         <li><label for="name">Class Name:</label><input type="text" name="name"<?php echo 'value="'.$class_name.'"'; ?> /></li>
@@ -66,11 +66,11 @@ if (mysql_num_rows($result) == 1) {
         <li><label for="type">Type of Class:</label><?php $result=$db->get_list('type'); dropdown($result, 'type', $type) ?></li>
         <li><label for="room">Room:</label><?php $result=$db->get_rooms($num); dropdown($result, 'room', $room_id) ?></li>
         <li><label for="hours">Start Time:</label><?php dropdown_num('hour', 1, 12, 1,$hr); echo ' : '; dropdown_num('minute', 0, 55, 5, $min); ?></li>
-        <li><label>Date: </label><?php get_event_dates($cdate); /*name="date"*/ ?>
+        <li><label>Date: </label><?php get_event_dates($cdate); ?>
         <li><input type="submit" class="button" name="unschedule" value="Unschedule Class" /><input type="submit" class="button" name="class" value="Add to Schedule" /></li>
     </ul>
-    <input type="hidden" name="kwds" value="<?php echo $num ?>" />
-    <input type="hidden" name="cid" value="<?php echo $cid ?>" />
+    <input type="hidden" name="kwds" value="<?php echo $kwds['id']; ?>" />
+    <input type="hidden" name="cid" value="<?php echo $cid; ?>" />
 </div>
 </form>
 <?php } ?>
@@ -85,10 +85,10 @@ if (mysql_num_rows($result) == 1) {
     <div class="class adv">Advanced Class<br />(Red Text)</div>
 </div>
 <?php
-$keday = (date('z', strtotime($kedate)) - date('z', strtotime($ksdate)));
+$keday = (date('z', strtotime($kwds['end_date'])) - date('z', strtotime($kwds['start_date'])));
 for ($kday=0; $kday <= $keday; $kday++) {
-    $result = $db->get_rooms($num);
-    if (mysql_num_rows($result) < 1) {
+    $result = $db->get_rooms($kwds['id']);
+    if (count($result) < 1) {
         echo '<p>There are no classes scheduled yet for day ' . ($kday + 1) . '.</p>';
     } else {
         echo '
@@ -104,18 +104,16 @@ for ($kday=0; $kday <= $keday; $kday++) {
         }
         echo '
     </div>';
-        $rows = mysql_num_rows($result);
-        for ($i = 0; $i < $rows; $i++) {
+        foreach ($result as $row) {
             echo'
     <div>';
-            $room = $db->get_class_rooms(mysql_result($result, $i, 'room.id'), date('z', strtotime($ksdate)) + $kday + 2);
-            if (mysql_num_rows($room) > 0) {
+            $rooms = $db->get_class_rooms($result['RoomID'], date('z', strtotime($kwds['start_date'])) + $kday + 2);
+            if (count($rooms) > 0) {
                 echo'
-        <div class="th">' . mysql_result($result, $i, 'name') . '</div>';
-                $rooms = mysql_num_rows($room);
-                for ($j = 0; $j < $rooms; $j++) {
-                    echo '<a href="class_schedule.php?kwds=' . $num . '&id=' . mysql_result($room, $j, 'class.id') . '"><div class="class';
-                    switch (mysql_result($room, $j, 'type_id')) {
+        <div class="th">' . $row['name'] . '</div>';
+                foreach ($rooms as $room) {
+                    echo '<a href="class_schedule.php?kwds=' . $kwds['id'] . '&id=' . $room['ClassID'] . '"><div class="class';
+                    switch ($room['type_id']) {
                         case 2:
                             echo ' europ';
                             break;
@@ -128,7 +126,7 @@ for ($kday=0; $kday <= $keday; $kday++) {
                         default:
                             break;
                     }
-                    switch (mysql_result($room, $j, 'difficulty_id')) {
+                    switch ($room['difficulty_id']) {
                         case 2:
                             echo ' beg';
                             break;
@@ -141,11 +139,11 @@ for ($kday=0; $kday <= $keday; $kday++) {
                         default:
                             break;
                     }
-                    $thistime = strtotime(mysql_result($room, $j, 'day'));
-                    echo '" style="width:' . (mysql_result($room, $j, 'hours') * 1.1) . 'px; position: absolute; margin-left: ' . mysql_result($room, $j, 'time') . 'px;"
-                        title="' . mysql_result($room, $j, 'description') . '">
-                        <input class="mark" type="checkbox" /><div class="title">' . date('g:iA', $thistime) . ' ' . mysql_result($room, $j, 'name') . '</div>
-                        <div class="user"> ' . mysql_result($room, $j, 'user') . '</div></div></a>';
+                    $thistime = strtotime($room['day']);
+                    echo '" style="width:' . ($room['hours'] * 1.1) . 'px; position: absolute; margin-left: ' . $room['time'] . 'px;"
+                        title="' . $room['description'] . '">
+                        <input class="mark" type="checkbox" /><div class="title">' . date('g:iA', $thistime) . ' ' . $room['name'] . '</div>
+                        <div class="user"> ' . $room['user'] . '</div></div></a>';
                 }
             }
             echo'
@@ -156,12 +154,12 @@ for ($kday=0; $kday <= $keday; $kday++) {
     }
 }
 echo '<div class="schedule"><h2>Unscheduled Classes</h2>';
-$classes = $db->get_unscheduled_classes($num);
-$row = mysql_num_rows($classes);
-if ($row > 0) {
-    for ($i = 0; $i < $row; $i++) {
-                    echo '<a href="class_schedule.php?kwds=' . $num . '&id=' . mysql_result($classes, $i, 'class.id') . '"><div class="class';
-                    switch (mysql_result($classes, $i, 'type_id')) {
+$classes = $db->get_unscheduled_classes($kwds['id']);
+
+if (count($classes) > 0) {
+    foreach ($classes as $class) {
+                    echo '<a href="class_schedule.php?kwds=' . $kwds['id'] . '&id=' . $class['id'] . '"><div class="class';
+                    switch ($class['type_id']) {
                         case 2:
                             echo ' europ';
                             break;
@@ -174,7 +172,8 @@ if ($row > 0) {
                         default:
                             break;
                     }
-                    switch (mysql_result($classes, $i, 'difficulty_id')) {
+                    
+                    switch ($class['difficulty_id']) {
                         case 2:
                             echo ' beg';
                             break;
@@ -187,7 +186,7 @@ if ($row > 0) {
                         default:
                             break;
                     }
-echo '" style="width:' . (mysql_result($classes, $i, 'hours') * 1.1) . 'px;" >' . mysql_result($classes, $i, 'name') . '</div></a>';
+echo '" style="width:' . ($class['hours'] * 1.1) . 'px;" >' . $class['name'] . '</div></a>';
     }
 }
 echo'</div>';

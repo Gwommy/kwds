@@ -3,8 +3,8 @@
  * KWDS User Edit Form
  */
 require_once('includes/header.php');
-$edit=$db->get_user($_POST['uid']);
-if (!isset($_POST['edit_user']) OR mysql_num_rows($edit)!=1) {
+$edit = $db->get_user($_POST['uid']);
+if (!isset($_POST['edit_user']) || count($edit) != 1) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('profile');
     die;
@@ -24,7 +24,7 @@ else {
         global $db;
         $result = $db->query("SELECT id FROM user WHERE username='$username' AND id!='".$_POST['uid']."'");
         // Check to see if user name is already being used or not
-        if (mysql_num_rows($result) > 0) {
+        if (count($result) > 0) {
             echo '<div class="box error">This user name is already taken. Please enter a different user name.</div>';
             edit_profile_form($edit);
         }
@@ -44,7 +44,7 @@ else {
             edit_profile_form($edit);
         }
         // Check if passwords are the same
-        elseif ($password == mysql_result($edit, 0, 'password')) {
+        elseif ($password == $edit['password']) {
             // Update the user account
             $title_id = $_POST['title_id'];
             $first = $_POST['first'];
@@ -88,55 +88,57 @@ function edit_profile_form($edit) { ?>
     <h3>Required Information</h3>
     <ul class="box warning">
         <li><label for="username">Username:</label><input type="text" name="username" id="username"
-            <?php echo 'value="'.mysql_result($edit, 0,'username').'"';?> /></li>
+            <?php echo 'value="'.$edit['username'].'"';?> /></li>
         <li><label for="email">Email Address:</label><input type="text" name="email" id="email"
-            <?php echo 'value="'.mysql_result($edit, 0,'email').'"';?> /></li>
+            <?php echo 'value="'.$edit['email'].'"';?> /></li>
         <li><label for="password">Password:</label><input type="password" name="password" id="password" /></li>
     </ul>
     <h3>Mundane Information (optional)</h3>
     <ul>
         <li><label for="prefix_id">Pre-fix:</label><?php $db= new db(); $result=$db->get_list('prefix');
-        $index = mysql_result($edit, 0,'prefix_id');
+        $index = $edit['prefix_id'];
         dropdown($result, "prefix_id", $index); ?></li>
         <li><label for="first">First Name:</label><input type="text" name="first" id="first_name"
-            <?php echo 'value="'.mysql_result($edit, 0,'first').'"';?> /></li>
+            <?php echo 'value="'.$edit['first'].'"';?> /></li>
         <li><label for="last">Last Name:</label><input type="text" name="last" id="last_name"
-            <?php echo 'value="'.mysql_result($edit, 0,'last').'"';?> /></li>
+            <?php echo 'value="'.$edit['last'].'"';?> /></li>
         <li><label for="nickname">Nick Name:</label><input type="text" name="nickname" id="nickname"
-            <?php echo 'value="'.mysql_result($edit, 0,'nickname').'"';?> /></li>
+            <?php echo 'value="'.$edit['nickname'].'"';?> /></li>
     </ul>
     <h3>Mundane Alternate Contact Information (optional)</h3>
     <ul>
         <li><label for="address">Address:</label><input type="text" name="address" id="address"
-            <?php echo 'value="'.mysql_result($edit, 0,'address').'"';?> /></li>
+            <?php echo 'value="'.$edit['address'].'"';?> /></li>
         <li><label for="city">City:</label><input type="text" name="city" id="city"
-            <?php echo 'value="'.mysql_result($edit, 0,'city').'"';?> /></li>
+            <?php echo 'value="'.$edit['city'].'"';?> /></li>
         <li><label for="state">State/Province:</label><input type="text" name="state" id="state"
-            <?php echo 'value="'.mysql_result($edit, 0,'state').'"';?> /></li>
+            <?php echo 'value="'.$edit['state'].'"';?> /></li>
         <li><label for="country">Country:</label><input type="text" name="country" id="country"
-            <?php echo 'value="'.mysql_result($edit, 0,'country').'"';?> /></li>
+            <?php echo 'value="'.$edit['country'].'"';?> /></li>
         <li><label for="zip">Zip Code:</label><input type="text" name="zip" id="zip"
-            <?php echo 'value="'.mysql_result($edit, 0,'zip').'"';?> /></li>
+            <?php echo 'value="'.$edit['zip'].'"';?> /></li>
         <li><label for="phone">Phone Number:</label><input type="text" name="phone" id="phone"
-            <?php echo 'value="'.mysql_result($edit, 0,'phone').'"';?> /></li>
+            <?php echo 'value="'.$edit['phone'].'"';?> /></li>
     </ul>
     <h3>SCA Information (optional)</h3>
     <ul>
-        <li><label for="title">SCA Title:</label><?php $db= new db(); $result=$db->get_list('title');
-            $index = mysql_result($edit, 0,'title_id');
+        <li><label for="title">SCA Title:</label><?php $db= new db(); $result = $db->get_list('title');
+            $index = $edit['title_id'];
             dropdown($result, "title_id", $index); ?></li>
         <li><label for="sca_first">SCA First Name:</label><input type="text" name="sca_first" id="sca_first"
-            <?php echo 'value="'.mysql_result($edit, 0,'sca_first').'"';?> /></li>
+            <?php echo 'value="'.$edit['sca_first'].'"';?> /></li>
         <li><label for="sca_last">SCA Last Name(s):</label><input type="text" name="sca_last" id="sca_last"
-            <?php echo 'value="'.mysql_result($edit, 0,'sca_last').'"';?> /></li>
+            <?php echo 'value="'.$edit['sca_last'].'"';?> /></li>
         <li><label for="group_id">SCA Local Group:</label><?php $db= new db(); $result=$db->get_list('plce7673_kwds.group');
-            $index = mysql_result($edit, 0,'group_id');
+            $index = $edit['group_id'];
             dropdown($result, "group_id", $index); ?></li>
     </ul>
     <h3>Enter a Biography for you Profile (optional)</h3>
     <ul>
-        <li><label for="about">About You:</label><textarea name="about" cols="5" rows="40"><?php
-            echo mysql_result($edit, 0,'about');?></textarea></li>
+        <li>
+            <label for="about">About You:</label>
+            <textarea name="about" cols="5" rows="40"><?php echo $edit['about'];?></textarea>
+        </li>
     </ul>
     <h3>Change Password (optional)</h3>
     <ul>

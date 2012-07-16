@@ -6,22 +6,22 @@
 require_once('includes/header.php');
 
 echo'<h1>Classes</h1>';
-$result = $db->get_class_info($num);
-if (mysql_num_rows($result) < 1) {
+$result = $db->get_class_info($kwds['id']);
+if (count($result) == 0) {
     echo'<p>There are no classes scheduled for this event yet.</p>';
 } else {
-    echo'<p>There are ' . mysql_num_rows($result) . ' classes.</p>';
-    $rows = mysql_num_rows($result);
-    for ($i = 0; $i < $rows; $i++) {
-        $class_name = mysql_result($result, $i, 'class.name');
-        $uid = mysql_result($result, $i, 'user.id');
-        $sca_name = mysql_result($result, $i, 'title.name') . ' ' . mysql_result($result, $i, 'sca_first') . ' ' . mysql_result($result, $i, 'sca_last');
-        $mundane_name = mysql_result($result, $i, 'prefix.name') . ' ' . mysql_result($result, $i, 'user.first') . ' ' . mysql_result($result, $i, 'user.last');
-        $room = mysql_result($result, $i, 'room.name');
-        $desc = redisplay(mysql_result($result, $i, 'class.description'));
-        $start_time = date('l \a\t g:iA', (strtotime(mysql_result($result, $i, 'day'))));
-        $length = mysql_result($result, $i, 'hours');
-        $type = mysql_result($result, $i, 'type_id');
+    echo'<p>There are ' . count($result) . ' classes.</p>';
+
+    foreach ($result as $row) {
+        $class_name = $row['ClassName'];
+        $uid = $row['UserID'];
+        $sca_name = $row['Title'] . ' ' . $row['SCAFirst'] . ' ' . $row['SCALast'];
+        $mundane_name = $row['PrefixName'] . ' ' . $row['MundaneFirst'] . ' ' . $row['MundaneLast'];
+        $room = $row['RoomName'];
+        $desc = redisplay($row['ClassDescription']);
+        $start_time = date('l \a\t g:iA', (strtotime($row['day'])));
+        $length = $row['hours'];
+        $type = $row['type_id'];
         echo'
 <div class="class_info">
     <h2>' . $class_name . '</h2>
@@ -37,15 +37,15 @@ if (mysql_num_rows($result) < 1) {
 </div>
         ';
     }
-    $result = $db->get_unscheduled_classes($num);
-    $row = mysql_num_rows($result);
-    if ($row > 0) {
+    $result = $db->get_unscheduled_classes($kwds['id']);
+
+    if (count($result) > 0) {
         echo '
 <h2>Unscheduled or Canceled Classes</h2>
     <ul>';
-        for ($i = 0; $i < $row; $i++) {
+        foreach ($result as $row) {
             echo '
-        <li>' . mysql_result($result, $i, 'name') . '</li>';
+        <li>' . $row['name'] . '</li>';
         }
         echo '
     </ul>';

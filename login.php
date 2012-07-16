@@ -19,16 +19,12 @@ else if ($_POST['username'] == '' || $_POST['password'] == '') {
     $password = sanit(md5($_POST['password']));
 
     // Check if the 'remember me' box has been checked
-    if (isset($_POST['remember'])) {
-        $remember = 'yes';
-    } else {
-        $remember = 'no';
-    }
+    $remember = (isset($_POST['remember'])) ? TRUE : FALSE;
 
     // Check input against database
     $result = $db->login($username, $password, $remember);
 
-    if (mysql_num_rows($result) > 0) {
+    if (count($result) > 0) {
         echo '<div class="box success">You have successfully logged in!</div>';
         redirect('index');
     } else {

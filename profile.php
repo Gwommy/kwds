@@ -9,20 +9,20 @@ $id = (isset($_SESSION['user_id'])) ? $_SESSION['user_id'] : 0;
 $id = (isset($_GET['id'])) ? $_GET['id'] : $id;
 
 $result = $db->get_user_info($id);
-if (mysql_num_rows($result) == 1) {
-    $first = mysql_result($result, 0, 'first');
-    $last = mysql_result($result, 0, 'last');
-    $nick = mysql_result($result, 0, 'nickname');
-    $sfirst = mysql_result($result, 0, 'sca_first');
-    $slast = mysql_result($result, 0, 'sca_last');
-    $pre = mysql_result($result, 0, 'prefix.name');
-    $email = mysql_result($result, 0, 'email');
-    $group = mysql_result($result, 0, 'group.name');
-    $gurl = mysql_result($result, 0, 'group.url');
-    $kingdom = mysql_result($result, 0, 'kingdom.name');
-    $kurl = mysql_result($result, 0, 'kingdom.url');
-    $about = mysql_result($result, 0, 'about');
-    $title = mysql_result($result, 0, 'title.name');
+if ($result) {
+    $first = $result['MundaneFirst'];
+    $last = $result['MundaneLast'];
+    $nick = $result['nickname'];
+    $sfirst = $result['SCAFirst'];
+    $slast = $result['SCALast'];
+    $pre = $result['PrefixName'];
+    $email = $result['email'];
+    $group = $result['GroupName'];
+    $gurl = $result['GroupURL'];
+    $kingdom = $result['KingdomName'];
+    $kurl = $result['KingdomURL'];
+    $about = $result['about'];
+    $title = $result['Title'];
 ?>
     <h1>User Profile
     <?php
@@ -54,30 +54,28 @@ if (mysql_num_rows($result) == 1) {
     </div>
     <?php
         $result=$db->get_user_jobs($id);
-        if (mysql_num_rows($result) >0) {
+        if (count($result) > 0) {
             echo '
     <div class="jobs">
         <h2>KWDS Staff</h2>
         <ul>';
-            $rows=mysql_num_rows($result);
-            for ($i=0;$i<$rows; $i++) {
+            foreach ($result as $row) {
                 echo '
-            <li><label>KWDS '.mysql_result($result, $i, 'kwds.id').': </label> '.mysql_result($result, $i, 'job.name').'</li>';
+            <li><label>KWDS '.$row['id'].': </label> '.$row['name'].'</li>';
             }
             echo '
         </ul>
     </div>';
         }
         $result=$db->get_user_classes($id);
-        if (mysql_num_rows($result)>0) {
+        if (count($result) > 0) {
             echo '
     <div class="classes">
         <h2>Classes Submitted</h2>
         <ul>';
-            $rows=mysql_num_rows($result);
-            for ($i=0;$i<$rows; $i++) {
+            foreach ($result as $row) {
                 echo'
-            <li><a href="schedule.php?kwds='.  mysql_result($result, $i, 'kwds_id').'&id='.  mysql_result($result, $i, 'id').'"><span class="bold">KWDS '.mysql_result($result, $i, 'kwds_id').'</span>: '.mysql_result($result, $i, 'name').'</a></li>';
+            <li><a href="schedule.php?kwds='.$row['kwds_id'].'&id='.$row['id'].'"><span class="bold">KWDS '.$row['kwds_id'].'</span>: '.$row['name'].'</a></li>';
             }
             echo '
         </ul>

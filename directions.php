@@ -3,26 +3,25 @@
  * KWDS Directions
  */
 require_once('includes/header.php');
-$kadd = str_replace(" ", "+", $kadd);
-$kcity = str_replace(" ", "+", $kcity);
-$kstate = str_replace(" ", "+", $kstate);
-$kcountry = str_replace(" ", "+", $kcountry);
+$kadd = str_replace(" ", "+", $kwds['address']);
+$kcity = str_replace(" ", "+", $kwds['city']);
+$kstate = str_replace(" ", "+", $kwds['state']);
+$kcountry = str_replace(" ", "+", $kwds['country']);
+$kzip = str_replace(" ", "+", $kwds['zip']);
 $kaddress=$kadd.',+'.$kcity.',+'.$kstate.'+'.$kzip.'+'.$kcountry;
 
 if (isset($_SESSION['user_id'])) {
-$result=$db->get_user_address($_SESSION['user_id']);
-$uadd = str_replace(" ", "+", mysql_result($result, 0, 'address'));
-$ucity = str_replace(" ", "+", mysql_result($result, 0, 'city'));
-$ustate = str_replace(" ", "+", mysql_result($result, 0, 'state'));
-$ucountry = str_replace(" ", "+", mysql_result($result, 0, 'country'));
-$uaddress=$uadd.',+'.$ucity.',+'.$ustate.'+'.mysql_result($result, 0, 'zip').'+'.$ucountry;
-
+    $result = $db->get_user_address($_SESSION['user_id']);
+    $uadd = str_replace(" ", "+", $result['address']);
+    $ucity = str_replace(" ", "+", $result['city']);
+    $ustate = str_replace(" ", "+", $result['state']);
+    $ucountry = str_replace(" ", "+", $result['country']);
+    $uaddress = $uadd.',+'.$ucity.',+'.$ustate.'+'.$result['zip'].'+'.$ucountry;
 } else {
-    $uaddress="";
+    $uaddress = "";
 }
 ?>
 <h1>Directions</h1>
-<p><?php $result=$db->get_directions($num); echo mysql_result($result, 0, 'directions');?></p>
 <div class="center">
 <iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=<?php echo $kaddress ?>&amp;ie=UTF8&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=<?php echo $kaddress; ?>&amp;aq=&amp;sll=37.0625,-95.677068&amp;sspn=37.819897,78.662109&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=<?php echo $kaddress; ?>&amp;z=14&amp;ll=43.080487,-73.787474" style="color:#0000FF;text-align:left">View Larger Map</a></small>
 <br />

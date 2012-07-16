@@ -4,20 +4,20 @@
  */
 require_once('includes/header.php');
 ?>
-    <h1 class="header"><a href="index.php?kwds=<?php echo $num ?>" title="Home">KWDS <? echo $num ?></a></h1>
+    <h1 class="header"><a href="index.php?kwds=<?php echo $kwds['id']; ?>" title="Home">KWDS <? echo $kwds['id']; ?></a></h1>
     <div class="entry">
         <div class="address">
-            <h2><?php echo $kname; ?></h2>
-            <h2><?php echo $kadd ?></h2>
-            <h2><?php echo $kcity;
-                if ($kcity!="" AND $kstate!="") {
+            <h2><?php echo $kwds['name']; ?></h2>
+            <h2><?php echo $kwds['address']; ?></h2>
+            <h2><?php echo $kwds['city'];
+                if ($kwds['city'] != "" && $kwds['state'] != "") {
                     echo ', ';
                 }
-                echo $kstate.' '. $kzip ?></h2>
-            <h2><?php echo $kcountry ?></h2>
+                echo $kwds['state'].' '. $kwds['zip']; ?></h2>
+            <h2><?php echo $kwds['country']; ?></h2>
         </div>
         <div class="kwds_description">
-            <p><?php echo $kdesc ?></p>
+            <p><?php echo $kwds['description']; ?></p>
         </div>
     </div>
 
