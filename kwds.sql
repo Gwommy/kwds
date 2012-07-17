@@ -251,7 +251,7 @@ INSERT INTO `group` (`id`, `name`, `url`, `kingdom_id`) VALUES
 (17, '(n/a) Lochac', 'http://lochac.sca.org/lochac/', 17),
 (18, '(n/a) Northshield', 'http://www.northshield.org/', 18),
 (19, '(n/a) Gleann Abhann', 'http://www.kingdomofgleannabhann.org/', 19),
-(21, '(n/a)', 'http://sca.org/', 20),
+(21, '(n/a)', 'http://sca.org/', 20);
 
 -- --------------------------------------------------------
 

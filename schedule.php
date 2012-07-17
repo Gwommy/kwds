@@ -9,32 +9,30 @@ $cid = (isset($_GET['id'])) ? $_GET['id'] : 0;
 $result = $db->get_class($cid);
 
 // Get the class information and store it in variables
-if (mysql_num_rows($result) == 1) {
-    $class_name = mysql_result($result, 0, 'class.name');
-    $uid = mysql_result($result, 0, 'user.id');
-    $sca_name = mysql_result($result, 0, 'title.name') . ' ' . mysql_result($result, 0, 'sca_first') . ' ' . mysql_result($result, 0, 'sca_last');
-    $mundane_name = mysql_result($result, 0, 'prefix.name') . ' ' . mysql_result($result, 0, 'user.first') . ' ' . mysql_result($result, 0, 'user.last');
-    $room = mysql_result($result, 0, 'room.name');
-    $desc = redisplay(redisplay(mysql_result($result, 0, 'class.description')));
-    $start_time = date('l \a\t g:iA', (strtotime(mysql_result($result, 0, 'day'))));
-    $length = mysql_result($result, 0, 'hours');
-    $type = mysql_result($result, 0, 'type_id');
+if (count($result) == 1) {
+    $class_name = $result['ClassName'];
+    $uid = $result['UserID'];
+    $sca_name = $result['Title'] . ' ' . $result['SCAFirst'] . ' ' . $result['SCALast'];
+    $mundane_name = $result['PrefixName'] . ' ' . $result['MundaneFirst'] . ' ' . $result['MundaneLast'];
+    $room = $result['RoomName'];
+    $desc = redisplay(redisplay($result['ClassDescription']));
+    $start_time = date('l \a\t g:iA', (strtotime($result['day'])));
+    $length = $result['hours'];
+    $type = $result['type_id'];
 
     // Display the class information
-    echo'
-<div class="class_info">
-    <h2>' . $class_name . '</h2>
-    <ul>
-        <li><label class="bold">Instructor: </label> <a href="profile.php?id=' . $uid . '">' . $sca_name;
-    if ($mundane_name != "  ") {
-        echo' (' . $mundane_name . ')';
-    }
-    echo'</a></li>
-        <li><label class="bold">Schedule: </label> ' . $room . ' on ' . $start_time . '</li>
-    </ul>
-    <p>' . $desc . '</p>
-</div>
-        ';
+    echo '<div class="class_info">
+        <h2>' . $class_name . '</h2>
+        <ul>
+            <li><label class="bold">Instructor: </label> <a href="profile.php?id=' . $uid . '">' . $sca_name;
+        if ($mundane_name != "  ") {
+            echo' (' . $mundane_name . ')';
+        }
+        echo'</a></li>
+            <li><label class="bold">Schedule: </label> ' . $room . ' on ' . $start_time . '</li>
+        </ul>
+        <p>' . $desc . '</p>
+    </div>';
 }
 $where="type_id>0";
 ?>
@@ -42,19 +40,19 @@ $where="type_id>0";
 <script language="JavaScript" type="text/javascript">
 
     function form_submit(id) {
-        document.forms["class_form"].action="schedule.php?kwds=<?php echo $num; ?>&id="+id;
+        document.forms["class_form"].action="schedule.php?kwds=<?php echo $kwds['id']; ?>&id="+id;
         document.forms["class_form"].submit();
     }
 
     function my_schedule() {
-        document.forms["class_form"].action="myschedule.php?kwds=<?php echo $num; ?>";
+        document.forms["class_form"].action="myschedule.php?kwds=<?php echo $kwds['id'];; ?>";
         document.getElementById("button").submit();
         //document.forms["class_form"].submit();
     }
 
 </script>
 <?php // Display the legend and the schedule ?>
-<h1>Schedule for KWDS <?echo roman($num);?></h1>
+<h1>Schedule for KWDS <?echo roman($kwds['id']);?></h1>
 <form id="class_form" method="post">
 <div class="schedule legend">
     <div class="th"><u>Legend</u><br />Black is not rated</div>
@@ -72,17 +70,17 @@ $where="type_id>0";
 
 // Determines number of days that this KWDS lasts
 $kday = 0;
-$keday = (date('z', strtotime($kedate)) - date('z', strtotime($ksdate)));
+$keday = (date('z', strtotime($kwds['end_date'])) - date('z', strtotime($kwds['start_date'])));
 for ($kday; $kday <= $keday; $kday++) {
-    $result = $db->get_rooms($num);
+    $result = $db->get_rooms($kwds['id']);
 
     // Show message if there are no rooms submitted for this KWDS
-    if (mysql_num_rows($result) < 1) {
+    if (count($result) < 1) {
         echo '<div class="box attention">There are no rooms available for this KWDS yet.</div>';
     }
 
     else {
-        $newdate=strtotime('+'.($kday)." day", strtotime($ksdate));
+        $newdate=strtotime('+'.($kday)." day", strtotime($kwds['start_date']));
         echo '
 <div class="schedule" ><h2>Day ' . ($kday+1) . ': '.date('l',$newdate).'</h2>
     <div class="tr">
@@ -96,19 +94,16 @@ for ($kday; $kday <= $keday; $kday++) {
         }
         echo '
     </div>';
-        $rows=mysql_num_rows($result);
-        for ($i = 0; $i < $rows; $i++) {
+        foreach ($result as $row) {
             echo'
     <div class="tr">';
-            $room = $db->get_class_rooms(mysql_result($result, $i, 'room.id'), date('z', strtotime($ksdate)) + $kday + 2, $where);
-            if (mysql_num_rows($room) > 0) {
+            $rooms = $db->get_class_rooms($result['RoomID'], date('z', strtotime($kwds['start_date'])) + $kday + 2, $where);
+            if (count($rooms) > 0) {
                 echo'
         <div class="th">' . mysql_result($result, $i, 'name') . '</div>';
-                $rooms=mysql_num_rows($room);
-                for ($j = 0; $j < $rooms; $j++) {
-                    //if ((isset($_POST['checkboxes']) AND $_POST['c' . mysql_result($room, $j, 'class.id')] == mysql_result($room, $j, 'class.id'))) {
+                foreach ($rooms as $room) {
                         echo '<div class="class';
-                        switch (mysql_result($room, $j, 'type_id')) {
+                        switch ($room['type_id']) {
                             case 2:
                                 echo ' europ';
                                 break;
@@ -121,7 +116,7 @@ for ($kday; $kday <= $keday; $kday++) {
                             default:
                                 break;
                         }
-                        switch (mysql_result($room, $j, 'difficulty_id')) {
+                        switch ($room['difficulty_id']) {
                             case 2:
                                 echo ' beg';
                                 break;
@@ -134,23 +129,20 @@ for ($kday; $kday <= $keday; $kday++) {
                             default:
                                 break;
                         }
-                        $thistime = strtotime(mysql_result($room, $j, 'day'));
-                        echo '" style="width:' . (mysql_result($room, $j, 'hours') * 1.1) . 'px; position: absolute; margin-left: ' . mysql_result($room, $j, 'time') . 'px;"
-                        title="' . mysql_result($room, $j, 'class.name') . ' - ' . mysql_result($room, $j, 'description') . '">
-                        <input class="mark" type="checkbox" name="c' . mysql_result($room, $j, 'class.id') . '" value="' . mysql_result($room, $j, 'class.id') . '"';
-                        if ($_POST['c' . mysql_result($room, $j, 'class.id')] == mysql_result($room, $j, 'class.id')) {
+                        $thistime = strtotime($room['day']);
+                        echo '" style="width:' . ($room['hours'] * 1.1) . 'px; position: absolute; margin-left: ' . $room['time'] . 'px;"
+                        title="' . $room['ClassName'] . ' - ' . $room['description'] . '">
+                        <input class="mark" type="checkbox" name="c' . $room['ClassID'] . '" value="' . $room['ClassID'] . '"';
+                        if ($_POST['c' . $room['ClassID']] == $room['ClassID']) {
                             echo ' checked="checked"';
                         }
-                        echo ' /><a onclick="form_submit(' . mysql_result($room, $j, 'class.id') . ')"><div class="title">' . date('g:iA', $thistime) . ' ' . mysql_result($room, $j, 'name') . '</div>
-                        <div class="user"> ' . mysql_result($room, $j, 'user') . '</div></a></div>';
-                    //}
+                        echo ' /><a onclick="form_submit(' . $room['ClassID'] . ')"><div class="title">' . date('g:iA', $thistime) . ' ' . $room['name'] . '</div>
+                        <div class="user"> ' . $room['user'] . '</div></a></div>';
                 }
             }
-            echo'
-    </div>';
+            echo '</div>';
         }
-        echo'
-</div>';
+        echo '</div>';
     }
 }
 ?>
@@ -158,12 +150,13 @@ for ($kday; $kday <= $keday; $kday++) {
 </form>
 <div class="schedule unschedule"><h2 class="unschedule">Unscheduled Classes</h2>
 <?php
-$classes = $db->get_unscheduled_classes($num);
-$row = mysql_num_rows($classes);
-if ($row > 0) {
-    for ($i = 0; $i < $row; $i++) {
-        echo '<a href="schedule.php?kwds=' . $num . '&id=' . mysql_result($classes, $i, 'class.id') . '"><div class="class';
-        switch (mysql_result($classes, $i, 'type_id')) {
+$classes = $db->get_unscheduled_classes($kwds['id']);
+
+if (count($classes) > 0) {
+    foreach ($classes as $class) {
+        echo '<a href="schedule.php?kwds=' . $kwds['id'] . '&id=' . $class['id'] . '"><div class="class';
+        
+        switch ($class['type_id']) {
             case 2:
                 echo ' europ';
                 break;
@@ -176,7 +169,8 @@ if ($row > 0) {
             default:
                 break;
         }
-        switch (mysql_result($classes, $i, 'difficulty_id')) {
+        
+        switch ($class['difficulty_id']) {
             case 2:
                 echo ' beg';
                 break;
@@ -189,26 +183,10 @@ if ($row > 0) {
             default:
                 break;
         }
-        echo '" style="width:' . (mysql_result($classes, $i, 'hours') * 1.1) . 'px;" >' . mysql_result($classes, $i, 'name') . '</div></a>';
+        
+        echo '" style="width:' . ($class['hours'] * 1.1) . 'px;" >' . $class['name'] . '</div></a>';
     }
 }
 ?>
 </div>
-<?php
-/*
-foreach ($_POST as $key => $value) {
-    echo $value;
-}
-*/
-
-/* $classes = $db->get_unscheduled_classes($num);
-  $row = mysql_num_rows($classes);
-  if ($row > 0) {
-  for ($i = 0; $i < $row; $i++) {
-  echo '
-  <div class="class" style="width:' . (mysql_result($classes, $i, 'hours') * 1.1) . 'px;" >' . mysql_result($classes, $i, 'name') . '</div>';
-  }
-  }
-  echo'</div>'; */
-include_once('includes/footer.php');
-?>
+<?php include_once('includes/footer.php'); ?>

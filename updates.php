@@ -3,7 +3,7 @@
  * KWDS Parking
  */
 require_once('includes/header.php');
-if (isset($_POST['description']) AND $_POST['description']!="") {
+if (isset($_POST['description']) && $_POST['description']!="") {
     $db->insert_update($_SESSION['user_id'], $_POST['description']);
     echo '<div class="box success">Your update has been added!</div>';
 }
@@ -19,12 +19,10 @@ if (isset($_POST['description']) AND $_POST['description']!="") {
 
 <?php
 }
-$result=$db->get_updates();
-$row=mysql_num_rows($result);
-for ($i=0;$i<$row;$i++) {
-    echo'
-<div><p><span class="bold">'.mysql_result($result, $i, 'username').' ('.date('M j, Y', strtotime(mysql_result($result, $i, 'date'))).')</span>: '.  mysql_result($result, $i, 'description').'</p>
-</div>';
+$result = $db->get_updates();
+
+foreach ($result as $row) {
+    echo'<div><p><span class="bold">'.$result['username'].' ('.date('M j, Y', strtotime($result['date'])).')</span>: '.$result['description'].'</p></div>';
 }
 include_once('includes/footer.php');
 ?>

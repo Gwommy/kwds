@@ -7,23 +7,23 @@ require_once('includes/header.php');
 <h1>Site Fees and Registration</h1>
 <div class="fees">
 <?php
-$result = $db->get_fees($num);
-$row = mysql_num_rows($result);
+$result = $db->get_fees($kwds['id']);
+
 $type="";
-if ($row > 1) {
-    for ($i = 0; $i < $row; $i++) {
-        if (($type.$prereg) != (mysql_result($result, $i, 'fee_type.name').mysql_result($result, $i, 'prereg'))) {
-            $type = mysql_result($result, $i, 'fee_type.name');
-            $prereg = mysql_result($result, $i, 'prereg');
+if (count($result) > 0) {
+    foreach ($result as $row) {
+        if ($type.$prereg != $row['FeeTypeName'].$row['prereg']) {
+            $type = $row['FeeTypeName'];
+            $prereg = $row['prereg'];
             echo '<h2>'.$type;
             if ($prereg==1) {
                 echo ' Pre-registration Fees';
             }
             echo '</h2>';
         }
-        $name = mysql_result($result, $i, 'fees.name');
-        $price = mysql_result($result, $i, 'price');
-        $desc = mysql_result($result, $i, 'description');
+        $name = $row['FeeName'];
+        $price = $row['price'];
+        $desc = $row['description'];
         
         setlocale(LC_MONETARY, 'en_US');
         echo '<div class="box info"><span class="float_right">'. money_format('%n', $price) .'</span>

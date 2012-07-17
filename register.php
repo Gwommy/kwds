@@ -24,8 +24,8 @@ if (!$session->isLoggedIn()) {
         global $db;
         $result = $db->query("SELECT username, email FROM user WHERE username='$username' or email='$email'");
         // Check to see if user name is already being used or not
-        if (mysql_num_rows($result) > 0) {
-            if (mysql_result($result, 0, 'username')==$username) {
+        if (count($result) > 0) {
+            if ($result['username'] == $username) {
                 echo '<div class="box error">This user name is already taken. Please enter a different user name.</div>';
             }
             else {

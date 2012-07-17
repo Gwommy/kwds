@@ -7,18 +7,15 @@
 
 // Checks to see if the logged-in user has permission to add rooms
 function can_add_rooms($id) {
-    $db=new db;
-    $result = $db->get_kwds($_GET['kwds']);
-    $n = mysql_result($result, 0, 'id');
+    $db = new db;
+    $kwds = $db->get_kwds($_GET['kwds']);
 
     // Checks to see if you are on staff for the upcoming KWDS
     if (isset($_SESSION['user_id'])) {
-        $result = $db->get_user_job($_SESSION['user_id'], $n);
+        $jobs = $db->get_user_job($_SESSION['user_id'], $kwds['id']);
 
-        if (mysql_num_rows($result) > 0){
-            $job=mysql_result($result, 0, 'job.id');
-
-            if (($job==1 OR $job==2 OR ($job>=6 AND $job<=9))) {
+        foreach ($jobs as $job){
+            if (($job['id'] == 1 || $job['id'] == 2 || ($job['id'] >= 6 && $job['id'] <= 9))) {
                 return true;
             }
         }
@@ -78,23 +75,21 @@ function check_email_address($email) {
 
 
 //Used to create a dropdown box, need list to require name and id
-function dropdown($result, $type, $select=1) {
-    $row = mysql_num_rows($result);
+function dropdown($result, $type, $select = 1) {
     echo '<select name="' . $type . '">';
     
     // Loop through each index of the result
-    for ($i = 0; $i < $row; $i++) {
-        $name = mysql_result($result, $i, 'name');
-        $num = mysql_result($result, $i, 'id');
-        echo '<option value="' . $num . '" ';
+    foreach ($result as $row) {
+        echo '<option value="' . $row['id'] . '" ';
         
         // Select the option if it is the same as the one selected in the database
-        if ($select == $num) {
+        if ($select == $row['id']) {
             echo 'selected="selected"';
         }
 
-        echo '>' . $name . '</option>';
+        echo '>' . $row['name'] . '</option>';
     }
+    
     echo '</select>';
 }
 
@@ -212,9 +207,7 @@ function is_autocrat($id,$n) {
         $result = $db->get_user_job($_SESSION['user_id'], $n);
 
         // If your job id# equals 1, 2, or 16 then you are an autocrat type-figure
-        if (mysql_num_rows($result) > 0 AND (mysql_result($result, 0, 'job.id')==1 
-            OR mysql_result($result, 0, 'job.id')==2 OR mysql_result($result, 0, 'job.id')==16))
-        {
+        if (count($result) > 0 && ($result[0]['id'] == 1 || $result[0]['id'] == 2 || $result[0]['id'] == 16)) {
             return true;
         }
     }
@@ -230,7 +223,7 @@ function is_autocrat($id,$n) {
 
 // Used to verify that the current user has access to everything
 function is_super_user() {
-    if ($_SESSION['user_id']==1) {
+    if ($_SESSION['user_id'] == 1) {
         return true;
     }
 

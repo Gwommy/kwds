@@ -32,7 +32,7 @@ class Session {
             $_SESSION['user_id'] = $id;
 
             // If remember is checked, set the cookie's expiration time to a month
-            if ($remember == 'yes') {
+            if ($remember) {
                 $expire = time() + 60 * 60 * 24 * 30;
                 setcookie('user', $id, $expire);
             }
@@ -49,5 +49,3 @@ class Session {
     }
 
 }
-
-?>

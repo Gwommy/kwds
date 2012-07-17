@@ -3,37 +3,39 @@
  * KWDS Edit Site Info
  */
 require_once('includes/header.php');
-if (!(is_autocrat($_SESSION['user_id'], $num) AND $num>=$db->get_kwds_number()) AND !is_super_user()) {
+if (!(is_autocrat($_SESSION['user_id'], $num) && $kwds['id'] >= $db->get_kwds_number()) && !is_super_user()) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('index');
     include_once('includes/footer.php');
     die;
 }
-$info=$db->get_kwds($num);
-if (mysql_num_rows($info)==1) {
-    $name=isset($_POST['name'])?$_POST['name']:mysql_result($info, 0, 'name');
-    $address=isset($_POST['address'])?$_POST['address']:mysql_result($info, 0, 'address');
-    $city=isset($_POST['city'])?$_POST['city']:mysql_result($info, 0, 'city');
-    $state=isset($_POST['state'])?$_POST['state']:mysql_result($info, 0, 'state');
-    $country=isset($_POST['country'])?$_POST['country']:mysql_result($info, 0, 'country');
-    $zip=isset($_POST['zip'])?$_POST['zip']:mysql_result($info, 0, 'zip');
-    $desc=isset($_POST['desc'])?sanit($_POST['desc']):redisplay(mysql_result($info, 0, 'description'));
-    $dir=isset($_POST['dir'])?sanit($_POST['dir']):redisplay(mysql_result($info, 0, 'directions'));
-    $status=isset($_POST['status'])?$_POST['status']:mysql_result($info, 0, 'status_id');
-    $group=isset($_POST['group'])?$_POST['group']:mysql_result($info, 0, 'group_id');
-    $kingdom=isset($_POST['kingdom'])?$_POST['kingdom']:mysql_result($info, 0, 'kingdom_id');
-    $banner=isset($_POST['banner'])?$_POST['banner']:mysql_result($info, 0, 'banner');
-    $facebook=isset($_POST['facebook'])?$_POST['facebook']:mysql_result($info, 0, 'facebook');
-    $cmonth=isset($_POST['cmonth'])?$_POST['cmonth']:date('n', strtotime(mysql_result($info, 0, 'class_date')));
-    $cday=isset($_POST['cday'])?$_POST['cday']:date('j', strtotime(mysql_result($info, 0, 'class_date')));
-    $cyear=isset($_POST['cyear'])?$_POST['cyear']:date('Y', strtotime(mysql_result($info, 0, 'class_date')));
-    $smonth=isset($_POST['smonth'])?$_POST['smonth']:date('n', strtotime(mysql_result($info, 0, 'start_date')));
-    $sday=isset($_POST['sday'])?$_POST['sday']:date('j', strtotime(mysql_result($info, 0, 'start_date')));
-    $syear=isset($_POST['syear'])?$_POST['syear']:date('Y', strtotime(mysql_result($info, 0, 'start_date')));
-    $emonth=isset($_POST['emonth'])?$_POST['emonth']:date('n', strtotime(mysql_result($info, 0, 'end_date')));
-    $eday=isset($_POST['eday'])?$_POST['eday']:date('j', strtotime(mysql_result($info, 0, 'end_date')));
-    $eyear=isset($_POST['eyear'])?$_POST['eyear']:date('Y', strtotime(mysql_result($info, 0, 'end_date')));
+
+$info=$db->get_kwds($kwds['id']);
+if (count($info) > 0) {
+    $name = isset($_POST['name'])?$_POST['name']:$info['name'];
+    $address = isset($_POST['address'])?$_POST['address']:$info['address'];
+    $city = isset($_POST['city'])?$_POST['city']:$info['city'];
+    $state = isset($_POST['state'])?$_POST['state']:$info['state'];
+    $country = isset($_POST['country'])?$_POST['country']:$info['country'];
+    $zip = isset($_POST['zip'])?$_POST['zip']:$info['zip'];
+    $desc = isset($_POST['desc'])?sanit($_POST['desc']):redisplay($info['description']);
+    $dir = isset($_POST['dir'])?sanit($_POST['dir']):redisplay($info['directions']);
+    $status = isset($_POST['status'])?$_POST['status']:$info['status_id'];
+    $group = isset($_POST['group'])?$_POST['group']:$info['group_id'];
+    $kingdom = isset($_POST['kingdom'])?$_POST['kingdom']:$info['kingdom_id'];
+    $banner = isset($_POST['banner'])?$_POST['banner']:$info['banner'];
+    $facebook = isset($_POST['facebook'])?$_POST['facebook']:$info['facebook'];
+    $cmonth = isset($_POST['cmonth'])?$_POST['cmonth']:date('n', strtotime($info['class_date']));
+    $cday = isset($_POST['cday'])?$_POST['cday']:date('j', strtotime($info['class_date']));
+    $cyear = isset($_POST['cyear'])?$_POST['cyear']:date('Y', strtotime($info['class_date']));
+    $smonth = isset($_POST['smonth'])?$_POST['smonth']:date('n', strtotime($info['start_date']));
+    $sday = isset($_POST['sday'])?$_POST['sday']:date('j', strtotime($info['start_date']));
+    $syear = isset($_POST['syear'])?$_POST['syear']:date('Y', strtotime($info['start_date']));
+    $emonth = isset($_POST['emonth'])?$_POST['emonth']:date('n', strtotime($info['end_date']));
+    $eday = isset($_POST['eday'])?$_POST['eday']:date('j', strtotime($info['end_date']));
+    $eyear = isset($_POST['eyear'])?$_POST['eyear']:date('Y', strtotime($info['end_date']));
 }
+
 if (isset($_POST['submit'])) {
     $class_date=$cyear.'-'.$cmonth.'-'.$cday.' 00:00:00';
     $start_date=$syear.'-'.$smonth.'-'.$sday.' 00:00:00';

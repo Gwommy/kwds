@@ -4,15 +4,13 @@
  */
 
 class db {
-
-    var $connection;
+    private $connection;
 
     // Select and connect to the database
     function db() {
         require_once('includes/config.php');
-        $this->connection = @mysql_connect(DB_HOST, DB_USER, DB_PASS) OR
+        $this->connection = @mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME) OR
             die('Unable to connect to database!');
-        mysql_select_db(DB_NAME) or die('Unable to select database!');
     }
 
     // Deletes a fee from the fees table
@@ -32,8 +30,9 @@ class db {
 
     // Checks to see if email exists in the system
     function email_exist($email) {
-        $result=$this->query("SELECT email FROM user WHERE email='$email'");
-        if (mysql_num_rows($result)==1) {
+        $result = $this->query("SELECT email FROM user WHERE email='$email'");
+        
+        if (is_array($result) && count($result) > 0) {
             return true;
         }
         return false;
@@ -42,7 +41,11 @@ class db {
     // Returns all kinds of class information for a particular KWDS
     function get_class_info($kwds) {
         return $this->query(
-            "SELECT * FROM aerobic, class, difficulty, era, ".DB_NAME.".group, kingdom, prefix, room, title, type, user
+            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst, sca_last AS SCALast, 
+                user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName, room.id AS RoomID, 
+                class.description AS ClassDescription, day, hours, type_id, difficulty_id AS DifficultyID, aerobic_id AS AerobicID, 
+                era_id AS EraID, prefix.name AS PrefixName
+            FROM aerobic, class, difficulty, era, `group`, kingdom, prefix, room, title, type, user
             WHERE aerobic.id=aerobic_id AND class.kwds_id='$kwds' AND difficulty_id=difficulty.id AND era_id=era.id
             AND user.group_id=group.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id AND room_id=room.id
             AND title_id=title.id AND type_id=type.id AND class.user_id=user.id ORDER BY class.name"
@@ -51,19 +54,27 @@ class db {
 
     // Returns all kinds of class information for a particular KWDS
     function get_class($id) {
-        return $this->query(
-            "SELECT * FROM aerobic, class, difficulty, era, ".DB_NAME.".group, kingdom, prefix, room, title, type, user
+        $return = $this->query(
+            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst, sca_last AS SCALast, 
+                user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName, room.id AS RoomID, 
+                class.description AS ClassDescription, day, hours, type_id, difficulty_id AS DifficultyID, aerobic_id AS AerobicID, 
+                era_id AS EraID, prefix.name AS PrefixName
+            FROM `aerobic`, `class`, `difficulty`, `era`, `group`, `kingdom`, `prefix`, `room`, `title`, `type`, `user`
             WHERE aerobic.id=aerobic_id AND difficulty_id=difficulty.id AND era_id=era.id AND class.id='$id'
-                AND user.group_id=group.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id
+                AND user.group_id=`group`.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id
                 AND (room_id=room.id or room_id='0') AND title_id=title.id AND type_id=type.id AND class.user_id=user.id
-            GROUP BY room_id ORDER BY class.name"
+            GROUP BY room_id
+            ORDER BY class.name"
         );
+        
+        if ($return) return $return[0];
+        else return array();
     }
 
     // Returns a list of classes from a particular room for a certain day
     function get_class_rooms($id, $day, $where="type_id>0") {
         return $this->query(
-            "SELECT class.name, class.id, description, CONCAT(user.sca_first,' ',sca_last) as user, type_id,
+            "SELECT class.name AS ClassName, class.id as ClassID, description, CONCAT(user.sca_first,' ',sca_last) as user, type_id,
                 difficulty_id, day, hours, ((((DATE_FORMAT(day,'%k')-9)*60)+DATE_FORMAT(day,'%i'))*1.15) as time
             FROM class, user
             WHERE room_id='$id' AND (DATE_FORMAT(day,'%j')+1)='$day' AND user_id=user.id AND ($where)"
@@ -77,15 +88,19 @@ class db {
 
     // Returns all information from a single fee
     function get_fee($id) {
-        return $this->query("SELECT * FROM fees WHERE id='$id'");
+        $return = $this->query("SELECT * FROM fees WHERE id='$id'");
+        
+        if ($return) return $return[0];
+        else return array();
     }
 
     // Returns a list of all fees from a particular KWDS
     function get_fees($id) {
         return $this->query(
-            "SELECT * FROM fees, fee_type
-            WHERE kwds_id='$id' and fee_type_id=fee_type.id
-            ORDER BY prereg DESC, fee_type_id ASC"
+            "SELECT `fees`.`id` AS FeeID, `fees`.`name` as FeeName, `price`, `description`, `fee_type`.`name` AS FeeTypeName, prereg
+            FROM `fees`, `fee_type`
+            WHERE `kwds_id` = '$id' and `fee_type_id` = `fee_type`.`id`
+            ORDER BY `prereg` DESC, `fee_type_id` ASC"
         );
     }
 
@@ -97,18 +112,21 @@ class db {
     // Returns information from one particular KWDS event
     function get_kwds($kwds) {
         $result = $this->query("SELECT * FROM kwds, kingdom WHERE kwds.id='$kwds' AND kingdom_id=kingdom.id");
-        if (mysql_num_rows($result) != 1) {
+        
+        if (count($result) == 0) {
             $result = $this->query(
                 "SELECT * FROM kwds, kingdom WHERE now() < end_date AND kingdom_id=kingdom.id LIMIT 1"
             );
         }
-        return $result;
+        
+        return $result[0];
     }
 
     // Returns the number of the next KWDS event
     function get_kwds_number() {
         $result = $this->query("SELECT id FROM kwds WHERE now() < end_date LIMIT 1");
-        return mysql_result($result, 0, 'id');
+        
+        return $result[0]['id'];
     }
 
     // Retrieves a list of KWDS's for which classes can still be submitted for
@@ -128,21 +146,22 @@ class db {
     // Returns a list of class information that you selected
     function get_my_schedule($where) {
         return $this->query(
-            "SELECT * FROM class,user, room
-            WHERE user.id=user_id AND room_id=room.id AND ($where)
-            ORDER BY day"
+            "SELECT day, `room`.`name` AS RoomName, `class`.`name` AS ClassName, `sca_first` AS SCAFirst, `sca_last` AS SCALast
+            FROM `class`, `user`, `room`
+            WHERE `user`.`id` = `user_id` AND `room_id` = `room`.`id` AND ($where)
+            ORDER BY `day`"
         );
     }
 
     // Returns a list of information for the previous KWDS events
     function get_previous_kwds() {
-        return $this->query("SELECT * FROM ".DB_NAME.".kwds WHERE end_date < NOW()");
+        return $this->query("SELECT * FROM `kwds` WHERE `end_date` < NOW()");
     }
 
     // Returns a list of a user's roles...**DOUBLE CHECK THIS LOGIC**
     function get_role($id) {
         return $this->query(
-            "SELECT username, job.name, kwds.id, job.id, user_id
+            "SELECT username, job.name, kwds.id as kwdsID, job.id as JobID, user_id
             FROM kwds, role, job, user
             WHERE user_id=user.id AND job.id=job_id AND kwds.id=kwds_id AND role_id='$id'"
         );
@@ -150,27 +169,31 @@ class db {
 
     // Returns a list of rooms for a particular KWDS
     function get_rooms($id) {
-        return $this->query("SELECT name, room.id FROM room WHERE kwds_id='$id' ORDER BY name");
+        return $this->query("SELECT name, room.id as RoomID FROM room WHERE kwds_id='$id' ORDER BY name");
     }
 
     // Returns a SQL result list of all staff members of a particular KWDS
     function get_staff($num) {
         return $this->query(
-            "SELECT CONCAT(username,'(',job.name,')') as name, role.role_id as id, job.name, prefix.name,
-                user.first, user.last, title.name, user.email, sca_first, sca_last, job.id, role.user_id
-            FROM title, prefix, user, role, job, kwds
-            WHERE title.id=title_id AND prefix.id=prefix_id AND user.id=user_id AND job.id=job_id
-                AND kwds.id=kwds_id AND kwds.id = $num
-            ORDER BY job.id"
+            "SELECT CONCAT(`username`,'(',`job`.`name`,')') as name, `role`.`role_id `as id, `job`.`name` AS JobName, `prefix`.`name` AS PrefixName,
+                `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, `title`.`name` AS Title, `user`.`email` AS UserEmail, `sca_first` AS SCAFirst, 
+                `sca_last` AS SCALast, `job`.`id` AS `JobID`, `role`.`user_id`
+            FROM `title`, `prefix`, `user`, `role`, `job`, `kwds`
+            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = `user_id` AND `job`.`id` = `job_id`
+                AND `kwds`.`id` = `kwds_id` AND `kwds`.`id` = $num
+            ORDER BY `job`.`id`"
         );
     }
 
     // Returns a list of teachers for a particular KWDS
     function get_teachers($id) {
         return $this->query(
-            "SELECT * FROM user, class
-            WHERE user_id=user.id and kwds_id='$id'
-            ORDER BY sca_first, sca_last, last, first,class.name"
+            "SELECT `user`.`id` AS UserID, `user`.`sca_first` AS SCAFirst, `user`.`sca_last` AS SCALast
+                `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, kwds_id, `class`.`id` AS ClassID
+                `class`.`name` AS ClassName
+            FROM `user`, `class`
+            WHERE `user_id` = `user`.`id` and `kwds_id` = '$id'
+            ORDER BY `sca_first`, `sca_last`, `last`, `first`, `class`.`name`"
         );
     }
 
@@ -192,12 +215,18 @@ class db {
 
     //Returns all information for a user
     function get_user($id) {
-        return $this->query("SELECT * FROM user WHERE user.id='$id'");
+        $return = $this->query("SELECT * FROM user WHERE user.id='$id'");
+        
+        if ($return) return $return[0];
+        else return array();
     }
 
     // Returns the user's address
     function get_user_address($id) {
-        return $this->query("SELECT address, city, state, country, zip FROM user WHERE id='$id'");
+        $return = $this->query("SELECT address, city, state, country, zip FROM user WHERE id='$id'");
+        
+        if ($return) return $return[0];
+        else return array();
     }
 
     // Returns a list of a submitted classes for a user
@@ -212,19 +241,24 @@ class db {
 
     // Returns an user's email address from the database
     function get_user_email($id) {
-        $result=$this->query("SELECT email FROM user WHERE id='$id'");
-        return mysql_result($result, 0, 'email');
+        $result = $this->query("SELECT email FROM user WHERE id='$id'");
+        return $result[0]['email'];
     }
 
     // Returns profile information for a particular user
     function get_user_info($id) {
-        return $this->query(
-            "SELECT user.id, user.first, user.last, sca_first, sca_last, title.name, prefix.name, nickname,
-                email, group.name, group.url, kingdom.name, kingdom.url, about
-            FROM user, ".DB_NAME.".group, title, prefix, kingdom
-            WHERE title.id=title_id AND prefix.id=prefix_id AND user.id='$id' AND group.id=user.group_id
-                AND kingdom.id=group.kingdom_id"
+        $return = $this->query(
+            "SELECT `user`.`id` AS UserID, `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, `sca_first` AS SCAFirst, 
+                `sca_last` AS SCALast, `title`.`name` AS Title, `prefix`.`name` as PrefixName, `nickname`,
+                `email`, `group`.`name` AS GroupName, `group`.`url` AS GroupURL, `kingdom`.`name` AS KingdomName, 
+                `kingdom`.`url` AS KingdomURL, `about`
+            FROM `user`, `group`, `title`, `prefix`, `kingdom`
+            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = '$id' AND `group`.`id` = `user`.`group_id`
+                AND `kingdom`.`id` = `group`.`kingdom_id`"
         );
+        
+        if ($return) return $return[0];
+        else return array();
     }
 
     // Returns a list of jobs that a user has at a particular KWDS
@@ -253,16 +287,17 @@ class db {
     // Retrieve's a user's nickname, SCA name, mundane name, or username
     function get_username($id) {
         $result = $this->query("SELECT nickname, username, sca_first, first FROM user WHERE user.id='$id'");
-        if (mysql_num_rows($result) > 0) {
-            if (mysql_result($result, 0, 'nickname') != "") {
-                $name = mysql_result($result, 0, 'nickname');
-            } elseif (mysql_result($result, 0, 'sca_first') != "") {
-                $name = mysql_result($result, 0, 'sca_first');
-            } elseif (mysql_result($result, 0, 'first') != "") {
-                $name = mysql_result($result, 0, 'first');
+        if (count($result) > 0) {
+            if ($result[0]['nickname'] != "") {
+                $name = $result[0]['nickname'];
+            } elseif ($result[0]['sca_first'] != "") {
+                $name = $result[0]['sca_first'];
+            } elseif ($result[0]['first'] != "") {
+                $name = $result[0]['first'];
             } else {
-                $name = mysql_result($result, 0, 'username');
-            } 
+                $name = $result[0]['username'];
+            }
+            
             return ucfirst($name);
         }
         else {
@@ -272,7 +307,7 @@ class db {
 
     // Add a new class to the database
     function insert_class($aero, $desc, $diff, $era, $fee, $hours, $kwds, $limit, $name, $type, $url, $user) {
-        $result = $this->query(
+        return $this->query(
             "INSERT INTO ".DB_NAME.".class (aerobic_id, description, difficulty_id, era_id, fee, hours,
                 kwds_id, class.limit, name, type_id, url, user_id)
             VALUES ('$aero', '$desc', '$diff', '$era', '$fee', '$hours', 
@@ -282,7 +317,7 @@ class db {
 
     // Add a new fee to the database
     function insert_fee($kwds, $name, $price, $desc, $pre, $type) {
-        $result=$this->query(
+        return $this->query(
             "INSERT INTO fees (description, kwds_id, name, prereg, price, fee_type_id)
             VALUES ('$desc', '$kwds', '$name', '$pre', '$price', '$type')"
         );
@@ -290,7 +325,7 @@ class db {
 
     // Add a new group to the database
     function insert_group($name, $url, $kingdom) {
-        $result=$this->query(
+        return $this->query(
             "INSERT INTO ".DB_NAME.".group (name, url, kingdom_id)
             VALUES ('$name', '$url', '$kingdom')"
         );
@@ -298,7 +333,7 @@ class db {
 
     // Add a new role to the database
     function insert_role($kwds, $user, $job) {
-        $result=$this->query(
+        return $this->query(
             "INSERT INTO role (kwds_id, job_id, user_id)
             VALUES ('$kwds', '$job', '$user')"
         );
@@ -306,7 +341,7 @@ class db {
 
     // Add a new room to the database
     function insert_room($name, $building, $size, $kwds, $notes) {
-        $result=$this->query(
+        return $this->query(
             "INSERT INTO room (name, building, size, kwds_id, note)
             VALUES ('$name', '$building', '$size', '$kwds', '$notes')"
         );
@@ -314,7 +349,7 @@ class db {
 
     // Add a new update to the database
     function insert_update($id, $desc) {
-        $result=$this->query(
+        return $this->query(
             "INSERT INTO ".DB_NAME.".update (user_id, description, date)
             VALUES ('$id', '$desc', NOW())"
         );
@@ -322,8 +357,7 @@ class db {
 
     // Add a new user to the database
     function insert_user($address, $about, $city, $country, $email, $first_name, $group, $last_name, 
-        $nickname, $password, $phone, $prefix, $sca_first, $sca_last, $state, $title, $username, $zip)
-    {
+        $nickname, $password, $phone, $prefix, $sca_first, $sca_last, $state, $title, $username, $zip) {
         $insert = "INSERT INTO user (email, password, username";
         $values = "VALUES ('$email', '$password', '$username'";
         $insert .= ( $address == "") ? "" : ", address";
@@ -358,49 +392,62 @@ class db {
         $values .= ( $zip == "") ? "" : ", '$zip'";
         $insert .= ") ";
         $values .= ")";
-        $result = $this->query($insert . $values);
+        return $this->query($insert . $values);
     }
 
     // Verifies user login information matchese the database information
     function login($username, $pass, $remember) {
         global $session;
+        
         $result = $this->query(
             "SELECT id FROM user
             WHERE (username='$username' OR email='$username') AND password='$pass'"
         );
-        if (mysql_num_rows($result) == 1) {
-            $session->login(mysql_result($result, 0, 'user.id'), $remember);
+        
+        if (count($result) > 0) {
+            $session->login($result[0]['id'], $remember);
         }
+        
         return $result;
     }
 
     // Use this function to call any query
     function query($query_string) {
-        $result = mysql_query($query_string) or die('Error is query: ' . $query_string . '.' . mysql_error());
-        return $result;
+        $result = mysqli_query($this->connection, $query_string) or die('Error is query: ' . $query_string . '.' . mysql_error());       
+
+        if ($result === TRUE || $result === FALSE) return $result; //Boolean on DML-type queries
+        
+        if (is_null($result)) return array(); //Results are null if there are no rows.  Make it an empty array, to play nice with loops
+        
+        $return = array();
+        for ($i = 0; $i < $result->num_rows; $i++) {
+            $return[] = $result->fetch_assoc(); //Array of associative arrays on DSL-type queries
+        }
+        
+        $result->free();
+        
+        return $return;
     }
 
     // Removes the room from a class to take it off the schedule
     function remove_from_schedule($id) {
-        $result=$this->query("UPDATE class SET room_id=0 WHERE class.id='$id'");
+        return $this->query("UPDATE class SET room_id=0 WHERE class.id='$id'");
     }
 
     // Function that lets the database know you need your password changed
     function setup_password($email, $random) {
         $result = $this->query("SELECT id FROM user WHERE email='$email'");
 
-        if (mysql_num_rows($result)==1) {
-            $uid=mysql_result($result, 0, 'id');
+        if (count($result) > 0) {
+            $uid = $result[0]['id'];
             $this->query("INSERT INTO password (user_id, value) VALUES ('$uid', '$random')");
-            return;
         }
-
-        echo '<div class="box error">That email does not exist in our system.</div>';
+        else echo '<div class="box error">That email does not exist in our system.</div>';
     }
 
     // Update the information of a class
     function update_class($aero, $cid, $date, $desc, $diff, $era, $hours, $name, $room, $type) {
-        $result=$this->query(
+        return $this->query(
             "UPDATE class SET aerobic_id='$aero', day='$date', description='$desc', difficulty_id='$diff',
                 era_id='$era',hours='$hours',name='$name',room_id='$room',type_id='$type'
             WHERE id='$cid'"
@@ -408,7 +455,7 @@ class db {
     }
 
     function update_fee($desc, $id, $name, $pre, $price, $type) {
-        $result=$this->query(
+        return $this->query(
             "UPDATE fees SET description='$desc', name='$name', prereg='$pre', price='$price', fee_type_id='$type'
             WHERE id='$id'"
         );
@@ -416,9 +463,8 @@ class db {
 
     // Update the KWDS site information
     function update_kwds($address, $banner, $city, $class_date, $country, $desc, $dir, $end_date,
-        $facebook, $group, $kingdom, $kwds, $name, $start_date, $state, $status, $zip)
-    {
-        $result=$this->query(
+        $facebook, $group, $kingdom, $kwds, $name, $start_date, $state, $status, $zip) {
+        return $this->query(
             "UPDATE kwds SET address='$address', banner='$banner', city='$city', class_date='$class_date',
                 country='$country', description='$desc', directions='$dir', end_date='$end_date',
                 facebook='$facebook',group_id='$group',kingdom_id='$kingdom', name='$name',
@@ -429,19 +475,18 @@ class db {
 
     // Update user's password
     function update_password($id, $email, $pass) {
-        $result = $this->query("UPDATE user SET password='$pass' WHERE id='$id' AND email='$email'");
+        return $this->query("UPDATE user SET password='$pass' WHERE id='$id' AND email='$email'");
     }
 
     // Update a peron's role/job
     function update_role($role, $user, $job, $kwds) {
-        $result = $this->query("UPDATE role SET user_id='$user', job_id='$job', kwds_id='$kwds' WHERE role_id='$role'");
+        return $this->query("UPDATE role SET user_id='$user', job_id='$job', kwds_id='$kwds' WHERE role_id='$role'");
     }
 
     // Update a user's profile infomation
     function update_user($about, $address, $city, $country, $email, $first, $group_id, $id, $last, 
-        $nickname, $password, $phone, $prefix_id, $sca_first, $sca_last, $state, $title_id, $username, $zip)
-    {
-        $result = $this->query(
+        $nickname, $password, $phone, $prefix_id, $sca_first, $sca_last, $state, $title_id, $username, $zip) {
+        return $this->query(
             "UPDATE user SET about='$about', address='$address', city='$city', country='$country',
                 email='$email', first='$first', group_id='$group_id', last='$last', nickname='$nickname',
                 password='$password', phone='$phone', prefix_id='$prefix_id', sca_first='$sca_first',
@@ -452,28 +497,24 @@ class db {
 
     // Verify that the email was entered correctly and matches the password reset page
     function verify_email($x, $email) {
-        $result=$this->query(
+        $result = $this->query(
             "SELECT user.id FROM user, password
             WHERE user_id=user.id AND user.email='$email' AND value='$x'"
         );
 
-        if (mysql_num_rows($result)==1) {
-            return mysql_result($result, 0, 'id');
+        if (count($result) > 0) {
+            return $result[0]['id'];
         }
-
-        return 0;
+        else return 0;
     }
 
     // Verify that the value for changing password is in the database
     function verify_value($x) {
-        $result=$this->query("SELECT id FROM password WHERE value='$x'");
+        $result = $this->query("SELECT id FROM password WHERE value='$x'");
 
-        if (mysql_num_rows($result)==1) {
+        if (count($result) > 0) {
             return true;
         }
-
-        return false;
+        else return false;
     }
 }
-
-?>

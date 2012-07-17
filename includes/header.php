@@ -17,7 +17,9 @@ if (!isset($_GET['kwds']) OR !is_numeric($_GET['kwds'])) {
     $_GET['kwds']=0;
 }
 // Get KWDS information and store it in variables
-$result=$db->get_kwds($_GET['kwds']);
+$kwds = $db->get_kwds($_GET['kwds']);
+/*
+Kept for now as a reference in refactoring.  Remove when done.
 $kadd=mysql_result($result, 0, 'address');
 $karms=mysql_result($result, 0, 'arms');
 $kattraction=mysql_result($result, 0, 'attractions');
@@ -36,10 +38,10 @@ $kreg=mysql_result($result, 0, 'registration');
 $ksdate=mysql_result($result, 0, 'start_date');
 $kstate=mysql_result($result, 0, 'state');
 $kzip=mysql_result($result, 0, 'zip');
-$num=mysql_result($result, 0, 'id');
+$num=mysql_result($result, 0, 'id');*/
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>Known World Dance and Music Symposium</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -49,17 +51,17 @@ $num=mysql_result($result, 0, 'id');
     <body>
         <div id="wrapper">
             <div id="header">
-                <?php if (mysql_result($result, 0, 'banner')=="") { ?>
+                <?php if ($kwds['banner'] == "") { ?>
                 <h1>
-                    <div class="float_left inline"><img src="./images/kingdoms/<?php echo $karms ?>" alt="<?php echo $kkingdom ?>" title="<?php echo $kkingdom ?> Kingdom"/></div>
-                    <a href="http://kwds.org">Known World Dance and Music Symposium <br /><?php echo roman($num) ?></a>
+                    <div class="float_left inline"><img src="./images/kingdoms/<?php echo $kwds['arms']; ?>" alt="<?php echo $kwds['kingdom']; ?>" title="<?php echo $kwds['kingdom']; ?> Kingdom"/></div>
+                    <a href="http://kwds.org">Known World Dance and Music Symposium <br /><?php echo roman($kwds['id']); ?></a>
                 </h1>
-                <h2><?php echo date('M j, Y', strtotime($ksdate)).' to '.date('M j, Y', strtotime($kedate)) ?></h2>
+                <h2><?php echo date('M j, Y', strtotime($kwds['start_date'])).' to '.date('M j, Y', strtotime($kwds['end_date'])); ?></h2>
                 <?php } else { ?>
 
                 <div id="banner">
-                    <div class="inline"><img src="./images/kingdoms/<?php echo $karms ?>" alt="Kingdom Arms" /></div>
-                    <a href="http://kwds.org"><img src="images/header/<?php echo mysql_result($result, 0, 'banner')?>" title="KWDS<?php echo $num ?>" /></a>
+                    <div class="inline"><img src="./images/kingdoms/<?php echo $kwds['arms']; ?>" alt="Kingdom Arms" /></div>
+                    <a href="http://kwds.org"><img src="images/header/<?php echo $kwds['banner']; ?>" title="KWDS<?php echo $kwds['id']; ?>" /></a>
                 </div>
                 <?php } ?>
             </div>
