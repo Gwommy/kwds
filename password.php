@@ -11,7 +11,7 @@ if (isset($_POST['email']) AND check_email_address($_POST['email'])) {
     if ($db->email_exist($_POST['email'])) {
         $random=random_gen(32);
         $db->setup_password($_POST['email'], $random);
-        $message = 'To reset your password, please visit the following page: http://plcengineering.net/kwmds/reset.php?x='.$random;
+        $message = 'To reset your password, please visit the following page: '.SITE_URL.'/reset.php?x='.$random;
         mail($_POST['email'], 'KWDS Password Reset', $message, 'From: no_reply@kwds.org');
         echo '<div class="box success">Password reset instructions have successfully been sent to your email address.</div>';
         redirect('index');

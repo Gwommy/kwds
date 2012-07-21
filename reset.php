@@ -15,7 +15,10 @@ if (isset($_GET['x']) AND $db->verify_value($_GET['x'])) {
             //change password
             $db->update_password($uid, $_POST['email'], sanit(md5($_POST['pass1'])));
             echo '<div class="box success">Your password has been changed. You may now login with new password.</div>';
-            redirect('login');
+            //*redirect('login');
+            $result = $db->login($_POST['email'], sanit(md5($_POST['pass1'])), 'yes');
+            redirect('index');
+            
             include_once('includes/footer.php');
             die;
         }

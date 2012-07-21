@@ -16,8 +16,8 @@ if (!$session->isLoggedIn()) {
     } else {
         $username = sanit($_POST['username']);
         $email = sanit($_POST['email']);
-        $password = sanit(md5($_POST['password']));
-        $password_verify = sanit(md5($_POST['password_verify']));
+        //$password = sanit(md5($_POST['password']));
+        //$password_verify = sanit(md5($_POST['password_verify']));
 
 
         // Check to make sure all data was entered correctly.
@@ -49,7 +49,7 @@ if (!$session->isLoggedIn()) {
             get_register_form();
         }
         // Check if passwords are the same
-        elseif ($password == $password_verify) {
+        else /**if ($password == $password_verify)**/ {
             // Create the user account
             $title = $_POST['title'];
             $first_name = $_POST['first_name'];
@@ -69,17 +69,23 @@ if (!$session->isLoggedIn()) {
             $db->insert_user($address, $bio, $city, $country, $email, $first_name, $group, $last_name, $nickname, $password, $phone, $prefix, $sca_first, $sca_last, $state, $title, $username, $zip);
 
             // Display success message to user
-            echo '<div class="box success">Your account has been created successfully! You will now be logged in.</div>';
+            //*echo '<div class="box success">Your account has been created successfully! You will now be logged in.</div>';
+            echo '<div class="box success">An email was sent with instructions for you to activate your new account.</div>';
+
+            $random=random_gen(32);
+            $db->setup_password($_POST['email'], $random);
+            $message = 'To activate your account, please visit the following page and submit a password for your account: '.SITE_URL.'/reset.php?x='.$random;
+            mail($email, '[KWDS]New Account Registration', $message, 'From: no_reply@kwds.org');
 
             // After the user has registered an account, log the user in
-            $result = $db->login($username, $password, 'yes');
-            redirect('index');
+            /**$result = $db->login($username, $password, 'yes');
+            redirect('index');**/
         }
         // If all else fails, then the passwords must not be matching
-        else {
+        /**else {
             echo '<div class="box error">Your passwords do not match! Please try again.</div>';
             get_register_form();
-        }
+        }**/
     }
     echo '</div></div>';
 } else {
@@ -112,8 +118,8 @@ function get_register_form() {
             <img src="images/icons/information.png" title="Your email will be used so you can retrieve your password." alt="Hint"
                  onclick="alert('This will be used so you can retrieve your password')" />
         </li>
-        <li><label for="password">Password:</label><input type="password" name="password" id="password" /></li>
-        <li><label for="password_verify">Re-enter password:</label><input type="password" name="password_verify" id="password_verify" /></li>
+        <!--<li><label for="password">Password:</label><input type="password" name="password" id="password" /></li>
+        <li><label for="password_verify">Re-enter password:</label><input type="password" name="password_verify" id="password_verify" /></li>-->
     </ul>
     <h3>Mundane Information (optional)</h3>
     <ul>
