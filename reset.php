@@ -36,5 +36,5 @@ else {
     echo '<div class="box error">You do not have proper documentation to be here.</div>';
     redirect('index');
 }
-include_once('includes/footer.php');
-?>
+
+require('footer.php'); ?>

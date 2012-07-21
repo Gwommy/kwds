@@ -2,7 +2,9 @@
 /*
  * KWDS Edit Site Info
  */
-require_once('includes/header.php');
+require('includes/init.php');
+require('header.php');
+
 if (!(is_autocrat($_SESSION['user_id'], $num) && $kwds['id'] >= $db->get_kwds_number()) && !is_super_user()) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('index');
@@ -85,6 +87,4 @@ if (isset($_POST['submit'])) {
     </ul>
 
 </form>
-<?php
-include_once('includes/footer.php');
-?>
+<?php require('footer.php'); ?>

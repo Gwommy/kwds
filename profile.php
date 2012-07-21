@@ -90,5 +90,4 @@ if ($result) {
 }
 
 //user.id, user.first, user.last, sca_first, sca_last, title.name, prefix.name, nickname, email, group.name, kingdom.name, about
-include_once('includes/footer.php');
-?>
+require('footer.php'); ?>

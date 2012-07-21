@@ -2,10 +2,10 @@
 /*
  * KWDS Merchants
  */
-require_once('includes/header.php');
+require('includes/init.php');
+require('header.php');
 ?>
 <h1>Merchants</h1>
 <p>There is no information to report.</p>
-<?php
-include_once('includes/footer.php');
-?>
+
+<?php require('includes/footer.php'); ?>

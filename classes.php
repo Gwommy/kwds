@@ -51,5 +51,5 @@ if (count($result) == 0) {
     </ul>';
     }
 }
-include_once('includes/footer.php');
-?>
+
+require('footer.php'); ?>

@@ -190,5 +190,6 @@ echo '" style="width:' . ($class['hours'] * 1.1) . 'px;" >' . $class['name'] . '
     }
 }
 echo'</div>';
-include_once('includes/footer.php');
+
+require('footer.php');
 ?>

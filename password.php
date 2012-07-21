@@ -37,6 +37,5 @@ elseif (isset($_POST['email'])) {
         <li><label></label><input class="button" type="submit" value="Send Me an Email" /></li>
     </ul>
 </form>
-<?php
-include_once('includes/footer.php');
-?>
+
+<?php require('includes/footer.php'); ?>

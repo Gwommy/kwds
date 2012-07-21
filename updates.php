@@ -24,5 +24,5 @@ $result = $db->get_updates();
 foreach ($result as $row) {
     echo'<div><p><span class="bold">'.$result['username'].' ('.date('M j, Y', strtotime($result['date'])).')</span>: '.$result['description'].'</p></div>';
 }
-include_once('includes/footer.php');
-?>
+
+require('includes/footer.php'); ?>

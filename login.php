@@ -32,7 +32,7 @@ else if ($_POST['username'] == '' || $_POST['password'] == '') {
         get_login_form();
     }
 }
-require_once('./includes/footer.php');
+require('footer.php');
 
 // Display the login form
 function get_login_form() {
