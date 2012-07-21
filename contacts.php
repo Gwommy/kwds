@@ -2,8 +2,11 @@
 /*
  * KWDS Contact Page
  */
-require_once('includes/header.php');
+require('includes/init.php');
+
 $result=$db->get_staff($kwds['id']);
+
+require('header.php');
 ?>
 <h1>KWDS <?php echo $kwds['id']; ?> Staff Members</h1>
 <?php
@@ -16,4 +19,6 @@ if (count($result) > 0) {
         echo '<p><label>Email: </label>'.$row['email'].'</p></div>';
     }
 }
-include_once('includes/footer.php');
+?>
+
+<?php include('footer.php'); ?>

@@ -45,7 +45,8 @@ elseif (isset($_POST['class'])) {
 else {
     show_class_form();
 }
-include_once('includes/footer.php');
+
+require('footer.php');
 
 // This function shows the class form
 function show_class_form() { ?>

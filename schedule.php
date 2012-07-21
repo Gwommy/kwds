@@ -189,4 +189,5 @@ if (count($classes) > 0) {
 }
 ?>
 </div>
-<?php include_once('includes/footer.php'); ?>
+
+<?php require('footer.php'); ?>

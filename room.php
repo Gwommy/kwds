@@ -33,5 +33,5 @@ if (isset($_SESSION['user_id']) AND can_add_rooms($_SESSION['user_id'])) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('index');
 }
-include_once('includes/footer.php');
-?>
+
+require('footer.php'); ?>

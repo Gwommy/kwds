@@ -47,5 +47,5 @@ foreach ($result as $row) {
 echo '</div>';
 echo '<input class="button" name="checkboxes" type="submit" value="Return to Schedule" />';
 echo '</form>';
-include_once('includes/footer.php');
-?>
+
+require('footer.php'); ?>

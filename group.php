@@ -2,7 +2,8 @@
 /*
  * KWDS Add A SCA Group
  */
-require_once('includes/header.php');
+require('includes/init.php');
+require('header.php');
 
 if (!$session->isLoggedIn()) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
@@ -33,5 +34,5 @@ else {
 </form>
 <?php
 }
-include_once('includes/footer.php');
+include_once('footer.php');
 ?>

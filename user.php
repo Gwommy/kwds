@@ -78,7 +78,7 @@ else {
             edit_profile_form($edit);
         }
         echo '</div></div>';
-        include_once('includes/footer.php');
+        require('footer.php');
     }
 }
    

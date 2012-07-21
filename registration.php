@@ -2,7 +2,8 @@
 /*
  * KWDS Registration
  */
-require_once('includes/header.php');
+require('includes/init.php');
+require('header.php');
 ?>
 <h1>Site Fees and Registration</h1>
 <div class="fees">
@@ -35,6 +36,5 @@ else {
 }
 ?>
 </div>
-<?php
-include_once('includes/footer.php');
-?>
+
+<?php require('footer.php'); ?>

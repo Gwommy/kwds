@@ -2,7 +2,8 @@
 /*
  * KWDS Index Home Page
  */
-require_once('includes/header.php');
+require('includes/init.php');
+require('header.php');
 ?>
     <h1 class="header"><a href="index.php?kwds=<?php echo $kwds['id']; ?>" title="Home">KWDS <? echo $kwds['id']; ?></a></h1>
     <div class="entry">
@@ -22,6 +23,4 @@ require_once('includes/header.php');
     </div>
 
 
-<?php
-include_once('includes/footer.php');
-?>
+<?php require('footer.php'); ?>

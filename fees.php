@@ -102,6 +102,5 @@ else {
     echo '<div class="box error">You do not have the proper documentation to view this page.</div>';
     redirect('index');
 }
-include_once('includes/footer.php');
-?>
 
+require('footer.php'); ?>
