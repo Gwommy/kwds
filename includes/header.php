@@ -45,8 +45,8 @@ $num=mysql_result($result, 0, 'id');*/
     <head>
         <title>Known World Dance and Music Symposium</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" href="kwds.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="print.css" type="text/css" media="print" />
+        <link rel="stylesheet" href="css/kwds.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="css/print.css" type="text/css" media="print" />
     </head>
     <body>
         <div id="wrapper">
