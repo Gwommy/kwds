@@ -5,20 +5,20 @@
     } ?>
     <h2>Main Menu</h2>
     <ul>
-        <li><a href="about.php?kwds=<?php echo $kwds['id']; ?>">About</a></li>
-        <li><a href="classes.php?kwds=<?php echo $kwds['id']; ?>">Class Listing</a></li>
-        <li><a href="schedule.php?kwds=<?php echo $kwds['id']; ?>">Class Schedule</a></li>
-        <li><a href="contacts.php?kwds=<?php echo $kwds['id']; ?>">Contacts</a></li>
-        <li><a href="index.php?kwds=<?php echo $kwds['id']; ?>">Directions</a></li>
-        <li><a href="food.php?kwds=<?php echo $kwds['id']; ?>">Food</a></li>
-        <li><a href="attractions.php?kwds=<?php echo $kwds['id']; ?>">Local Attractions</a></li>
-        <li><a href="lodging.php?kwds=<?php echo $kwds['id']; ?>">Lodging</a></li>
-        <li><a href="index.php?kwds=<?php echo $kwds['id']; ?>">Main Page(Home)</a></li>
-        <li><a href="merchants.php?kwds=<?php echo $kwds['id']; ?>">Merchants</a></li>
-        <li><a href="parking.php?kwds=<?php echo $kwds['id']; ?>">Parking</a></li>
-        <li><a href="proceedings.php?kwds=<?php echo $kwds['id']; ?>">Proceedings</a></li>
-        <li><a href="registration.php?kwds=<?php echo $kwds['id']; ?>">Registration</a></li>
-        <li><a href="teacher.php?kwds=<?php echo $kwds['id']; ?>">Teachers</a></li>
+        <li><a href="about.php?kwds=<?php echo $kwds['KWID']; ?>">About</a></li>
+        <li><a href="classes.php?kwds=<?php echo $kwds['KWID']; ?>">Class Listing</a></li>
+        <li><a href="schedule.php?kwds=<?php echo $kwds['KWID']; ?>">Class Schedule</a></li>
+        <li><a href="contacts.php?kwds=<?php echo $kwds['KWID']; ?>">Contacts</a></li>
+        <li><a href="directions.php?kwds=<?php echo $kwds['KWID']; ?>">Directions</a></li>
+        <li><a href="food.php?kwds=<?php echo $kwds['KWID']; ?>">Food</a></li>
+        <li><a href="attractions.php?kwds=<?php echo $kwds['KWID']; ?>">Local Attractions</a></li>
+        <li><a href="lodging.php?kwds=<?php echo $kwds['KWID']; ?>">Lodging</a></li>
+        <li><a href="index.php?kwds=<?php echo $kwds['KWID']; ?>">Main Page(Home)</a></li>
+        <li><a href="merchants.php?kwds=<?php echo $kwds['KWID']; ?>">Merchants</a></li>
+        <li><a href="parking.php?kwds=<?php echo $kwds['KWID']; ?>">Parking</a></li>
+        <li><a href="proceedings.php?kwds=<?php echo $kwds['KWID']; ?>">Proceedings</a></li>
+        <li><a href="registration.php?kwds=<?php echo $kwds['KWID']; ?>">Registration</a></li>
+        <li><a href="teacher.php?kwds=<?php echo $kwds['KWID']; ?>">Teachers</a></li>
     </ul>
 
     <h2>User Options</h2>
@@ -29,14 +29,14 @@
         <?php } else { ?>
         <li><a href="group.php">Add a SCA Group</a></li>
             <?php
-            if (can_add_rooms($_SESSION['user_id']) && $kwds['id'] >= $db->get_kwds_number() || is_super_user()) {
-                echo '<li><a href="fees.php?kwds='.$kwds['id'].'">Add a Fee</a></li>';
-                echo '<li><a href="room.php?kwds='.$kwds['id'].'">Add a Room</a></li>';
-                echo '<li><a href="class_schedule.php?kwds='.$kwds['id'].'">Edit Class Schedule</a></li>';
+            if (can_add_rooms($_SESSION['user_id']) && $kwds['KWID'] >= $db->get_kwds_number() || is_super_user()) {
+                echo '<li><a href="fees.php?kwds='.$kwds['KWID'].'">Add a Fee</a></li>';
+                echo '<li><a href="room.php?kwds='.$kwds['KWID'].'">Add a Room</a></li>';
+                echo '<li><a href="class_schedule.php?kwds='.$kwds['KWID'].'">Edit Class Schedule</a></li>';
             }
-            if ((is_autocrat($_SESSION['user_id'], $kwds['id']) && $kwds['id'] >= $db->get_kwds_number()) || is_super_user()) {
-                echo '<li><a href="kwds.php?kwds='.$kwds['id'].'">Edit KWDS Site Info</a></li>';
-                echo '<li><a href="staff.php?kwds='.$kwds['id'].'">Edit Staff</a></li>';
+            if ((is_autocrat($_SESSION['user_id'], $kwds['KWID']) && $kwds['KWID'] >= $db->get_kwds_number()) || is_super_user()) {
+                echo '<li><a href="kwds.php?kwds='.$kwds['KWID'].'">Edit KWDS Site Info</a></li>';
+                echo '<li><a href="staff.php?kwds='.$kwds['KWID'].'">Edit Staff</a></li>';
             }
             ?>
         <li><a href="class.php">Submit a Class</a></li>
@@ -52,12 +52,12 @@
         $title = $row['city'];
         if ($row['city'] != "" && $row['state'] != "") $title .= ', '; 
         $title .= $row['state']; 
-        if ($row['state'] != "" && $result['country'] != "") $title .= ', ';
+        if ($row['state'] != "" && $row['country'] != "") $title .= ', ';
         $title .= $row['country'];
         ?>
         <li>
-            <a href="index.php?kwds='<?php echo $row['id']; ?>'" title="<?php echo $title; ?>">
-                KWDS '<?php echo roman($row['id']); ?> ( <?php echo date('Y', strtotime($row['end_date'])); ?> )
+            <a href="index.php?kwds=<?php echo $row['id']; ?>" title="<?php echo $title; ?>">
+                KWDS <?php echo roman($row['id']); ?> (<?php echo date('Y', strtotime($row['end_date'])); ?>)
             </a>
         </li>
     <?php } ?>
@@ -69,15 +69,11 @@
         $title = $row['city'];
         if ($row['city'] != "" && $row['state'] != "") $title .= ', '; 
         $title .= $row['state']; 
-        if ($row['state'] != "" && $result['country'] != "") $title .= ', ';
+        if ($row['state'] != "" && $row['country'] != "") $title .= ', ';
         $title .= $row['country'];
-        ?>
-        <li>
-            <a href="index.php?kwds='<?php echo $row['id']; ?>'" title="<?php echo $title; ?>">
-                KWDS '<?php echo roman($row['id']); ?> ( <?php echo date('Y', strtotime($row['end_date'])); ?> )
-            </a>
-        </li>
-    <?php } ?>
+        echo '<li><a href="index.php?kwds=' . $row['id'] . '" title="' . $title . '">KWDS '.
+            roman($row['id']) . ' (' . date('Y', strtotime($row['end_date'])) . ')</a></li>';
+    } ?>
     </ul>
 
     <h2>Links</h2>

@@ -39,8 +39,8 @@ require('header.php');
 
     <form class="form" action="//maps.google.com/maps" id="map_form" name="v1Form" target="_blank">
         <ul>
-            <li><label style="width: 30px;">To:</label><input id="saddr" maxlength="1024" name="saddr" value="<?php echo str_replace('+', ' ', $uaddress); ?>"></li>
-            <li><label style="width: 30px;">From:</label><input id="daddr" maxlength="1024" name="daddr" value="<?php echo str_replace('+', ' ', $kaddress); ?>"></li>
+            <li><label style="width: 30px;">To:</label><input id="saddr" maxlength="1024" name="saddr" value="<?php echo str_replace('+', ' ', $kaddress); ?>"></li>
+            <li><label style="width: 30px;">From:</label><input id="daddr" maxlength="1024" name="daddr" value="<?php echo str_replace('+', ' ', $uaddress); ?>"></li>
             <li><label style="width: 30px;"></label><input class="button" type="submit" value="Get Directions"></li>
         </ul>
     </form>

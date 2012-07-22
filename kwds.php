@@ -5,14 +5,14 @@
 require('includes/init.php');
 require('header.php');
 
-if (!(is_autocrat($_SESSION['user_id'], $num) && $kwds['id'] >= $db->get_kwds_number()) && !is_super_user()) {
+if (!(is_autocrat($_SESSION['user_id'], $kwds['KWID']) && $kwds['KWID'] >= $db->get_kwds_number()) && !is_super_user()) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('index');
     include_once('includes/footer.php');
     die;
 }
 
-$info=$db->get_kwds($kwds['id']);
+$info=$db->get_kwds($kwds['KWID']);
 if (count($info) > 0) {
     $name = isset($_POST['name'])?$_POST['name']:$info['name'];
     $address = isset($_POST['address'])?$_POST['address']:$info['address'];
@@ -42,12 +42,12 @@ if (isset($_POST['submit'])) {
     $class_date=$cyear.'-'.$cmonth.'-'.$cday.' 00:00:00';
     $start_date=$syear.'-'.$smonth.'-'.$sday.' 00:00:00';
     $end_date=$eyear.'-'.$emonth.'-'.$eday.' 00:00:00';
-    $db->update_kwds($address,$banner,$city,$class_date,$country,$desc,$dir,$end_date,$facebook,$group,$kingdom,$num,$name,$start_date,$state,$status,$zip);
+    $db->update_kwds($address,$banner,$city,$class_date,$country,$desc,$dir,$end_date,$facebook,$group,$kingdom,$kwds['KWID'],$name,$start_date,$state,$status,$zip);
     echo '<div class="box success">The KWDS information has been updated!</div>';
 }
 ?>
 <h1>Edit Site Information</h1>
-<form class="form" action="kwds.php?kwds=<?php echo $num?>" method="post">
+<form class="form" action="kwds.php?kwds=<?php echo $kwds['KWID']?>" method="post">
     <h2>Location</h2>
     <ul>
         <li><label>Name of Site:</label><input name="name" type="text" <?php if(isset($name)) {echo 'value="'.$name.'"';} ?> /></li>
@@ -68,7 +68,7 @@ if (isset($_POST['submit'])) {
     <h2>Status</h2>
     <ul>
         <li><label>Status:</label><?php $result=$db->get_list('status'); dropdown($result, 'status', $status) ?></li>
-        <li><label>Group:</label><?php $result=$db->get_list('plce7673_kwds.group');
+        <li><label>Group:</label><?php $result=$db->get_list('`group`');
             $index = (isset($_POST['group']))? $_POST['group']:$group;
             dropdown($result, "group", $index); ?></li>
         <li><label>Kingdom:</label><?php $result=$db->get_list('kingdom'); dropdown($result, 'kingdom',$group) ?></li>

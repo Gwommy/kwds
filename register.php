@@ -158,7 +158,7 @@ function get_register_form() {
             <?php if (isset($_POST['sca_first'])) { echo 'value="'.$_POST['sca_first'].'"'; } ?> /></li>
         <li><label for="sca_last">SCA Last Name(s):</label><input type="text" name="sca_last" id="sca_last"
             <?php if (isset($_POST['sca_last'])) { echo 'value="'.$_POST['sca_last'].'"'; } ?> /></li>
-        <li><label for="group">SCA Local Group:</label><?php $db= new db(); $result=$db->get_list('plce7673_kwds.group');
+        <li><label for="group">SCA Local Group:</label><?php $db= new db(); $result=$db->get_list('`group`');
             $index = (isset($_POST['group']))? $_POST['group']:21;
             dropdown($result, "group", $index); ?>
             <img src="images/icons/information.png" title="If your group isn't listed, you can add it and change it later." alt="Hint"

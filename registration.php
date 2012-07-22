@@ -8,12 +8,14 @@ require('header.php');
 <h1>Site Fees and Registration</h1>
 <div class="fees">
 <?php
-$result = $db->get_fees($kwds['id']);
-
+$result = $db->get_fees($kwds['KWID']);
+$prereg="0";
 $type="";
 if (count($result) > 0) {
     foreach ($result as $row) {
-        if ($type.$prereg != $row['FeeTypeName'].$row['prereg']) {
+
+        // If the next fee type and preregistration does not match, display the next title
+        if (($type.$prereg) != ($row['FeeTypeName'].$row['prereg'])) {
             $type = $row['FeeTypeName'];
             $prereg = $row['prereg'];
             echo '<h2>'.$type;
@@ -25,9 +27,9 @@ if (count($result) > 0) {
         $name = $row['FeeName'];
         $price = $row['price'];
         $desc = $row['description'];
-        
-        setlocale(LC_MONETARY, 'en_US');
-        echo '<div class="box info"><span class="float_right">'. money_format('%n', $price) .'</span>
+        setlocale (LC_MONETARY, 'en_US');
+        //$amount = money_format('%n', floatval($price));
+        echo '<div class="box info"><span class="float_right">$'. number_format($price, 2).'</span>
             <h3 class="bold">' . $name .'</h3><br />' . $desc .'</div>';
     }
 }

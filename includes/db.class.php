@@ -38,27 +38,28 @@ class db {
         return false;
     }
 
-    // Returns all kinds of class information for a particular KWDS
+    // Returns all kinds of class information for scheduled classes in a particular KWDS
     function get_class_info($kwds) {
         return $this->query(
-            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst, sca_last AS SCALast, 
-                user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName, room.id AS RoomID, 
-                class.description AS ClassDescription, day, hours, type_id, difficulty_id AS DifficultyID, aerobic_id AS AerobicID, 
-                era_id AS EraID, prefix.name AS PrefixName
-            FROM aerobic, class, difficulty, era, `group`, kingdom, prefix, room, title, type, user
+            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst,
+                sca_last AS SCALast, user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName,
+                room.id AS RoomID, class.description AS ClassDescription, day, hours, type_id,
+                difficulty_id AS DifficultyID, aerobic_id AS AerobicID, era_id AS EraID, prefix.name AS PrefixName
+            FROM `aerobic`, `class`, `difficulty`, `era`, `group`, `kingdom`, `prefix`, `room`, `title`, `type`, `user`
             WHERE aerobic.id=aerobic_id AND class.kwds_id='$kwds' AND difficulty_id=difficulty.id AND era_id=era.id
-            AND user.group_id=group.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id AND room_id=room.id
-            AND title_id=title.id AND type_id=type.id AND class.user_id=user.id ORDER BY class.name"
+                AND user.group_id=group.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id AND room_id=room.id
+                AND title_id=title.id AND type_id=type.id AND class.user_id=user.id
+            ORDER BY class.name"
         );
     }
 
-    // Returns all kinds of class information for a particular KWDS
+    // Returns all kinds of class information for all classes in a particular KWDS
     function get_class($id) {
         $return = $this->query(
-            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst, sca_last AS SCALast, 
-                user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName, room.id AS RoomID, 
-                class.description AS ClassDescription, day, hours, type_id, difficulty_id AS DifficultyID, aerobic_id AS AerobicID, 
-                era_id AS EraID, prefix.name AS PrefixName
+            "SELECT class.name AS ClassName, user.id AS UserID, title.name AS Title, sca_first AS SCAFirst,
+                sca_last AS SCALast, user.first AS MundaneFirst, user.last AS MundaneLast, room.name AS RoomName,
+                room.id AS RoomID, class.description AS ClassDescription, day, hours, type_id,
+                difficulty_id AS DifficultyID, aerobic_id AS AerobicID, era_id AS EraID, prefix.name AS PrefixName
             FROM `aerobic`, `class`, `difficulty`, `era`, `group`, `kingdom`, `prefix`, `room`, `title`, `type`, `user`
             WHERE aerobic.id=aerobic_id AND difficulty_id=difficulty.id AND era_id=era.id AND class.id='$id'
                 AND user.group_id=`group`.id AND kingdom_id=kingdom.id AND prefix_id=prefix.id
@@ -72,12 +73,13 @@ class db {
     }
 
     // Returns a list of classes from a particular room for a certain day
-    function get_class_rooms($id, $day, $where="type_id>0") {
+    function get_class_rooms($id, $day, $where="type_id > 0") {
         return $this->query(
-            "SELECT class.name AS ClassName, class.id as ClassID, description, CONCAT(user.sca_first,' ',sca_last) as user, type_id,
-                difficulty_id, day, hours, ((((DATE_FORMAT(day,'%k')-9)*60)+DATE_FORMAT(day,'%i'))*1.15) as time
-            FROM class, user
-            WHERE room_id='$id' AND (DATE_FORMAT(day,'%j')+1)='$day' AND user_id=user.id AND ($where)"
+            "SELECT class.name AS ClassName, class.id as ClassID, description, 
+                CONCAT(user.sca_first,' ',sca_last) as user, type_id, difficulty_id, day, hours,
+                ((((DATE_FORMAT(day,'%k') - 9) * 60) + DATE_FORMAT(day,'%i')) * 1.15) as time
+            FROM `class`, `user`
+            WHERE room_id='$id' AND (DATE_FORMAT(day,'%j') + 1)='$day' AND user_id=user.id AND ($where)"
         );
     }
 
@@ -97,7 +99,8 @@ class db {
     // Returns a list of all fees from a particular KWDS
     function get_fees($id) {
         return $this->query(
-            "SELECT `fees`.`id` AS FeeID, `fees`.`name` as FeeName, `price`, `description`, `fee_type`.`name` AS FeeTypeName, prereg
+            "SELECT `fees`.id AS FeeID, `fees`.name as FeeName, price, description,
+                `fee_type`.name AS FeeTypeName, prereg
             FROM `fees`, `fee_type`
             WHERE `kwds_id` = '$id' and `fee_type_id` = `fee_type`.`id`
             ORDER BY `prereg` DESC, `fee_type_id` ASC"
@@ -111,11 +114,13 @@ class db {
 
     // Returns information from one particular KWDS event
     function get_kwds($kwds) {
-        $result = $this->query("SELECT * FROM kwds, kingdom WHERE kwds.id='$kwds' AND kingdom_id=kingdom.id");
+        $result = $this->query("SELECT *, kwds.id as KWID, kingdom.name as kingdom FROM kwds, kingdom
+            WHERE kwds.id='$kwds' AND kingdom_id=kingdom.id");
         
         if (count($result) == 0) {
             $result = $this->query(
-                "SELECT * FROM kwds, kingdom WHERE now() < end_date AND kingdom_id=kingdom.id LIMIT 1"
+                "SELECT *, kwds.id as KWID, kingdom.name as kingdom FROM kwds, kingdom
+                WHERE now() < end_date AND kingdom_id=kingdom.id LIMIT 1"
             );
         }
         
@@ -146,7 +151,8 @@ class db {
     // Returns a list of class information that you selected
     function get_my_schedule($where) {
         return $this->query(
-            "SELECT day, `room`.`name` AS RoomName, `class`.`name` AS ClassName, `sca_first` AS SCAFirst, `sca_last` AS SCALast
+            "SELECT day, `room`.`name` AS RoomName, `class`.`name` AS ClassName, `sca_first` AS SCAFirst,
+                `sca_last` AS SCALast
             FROM `class`, `user`, `room`
             WHERE `user`.`id` = `user_id` AND `room_id` = `room`.`id` AND ($where)
             ORDER BY `day`"
@@ -161,7 +167,7 @@ class db {
     // Returns a list of a user's roles...**DOUBLE CHECK THIS LOGIC**
     function get_role($id) {
         return $this->query(
-            "SELECT username, job.name, kwds.id as kwdsID, job.id as JobID, user_id
+            "SELECT username, job.name as JobName, kwds.id as kwdsID, job.id as JobID, user_id
             FROM kwds, role, job, user
             WHERE user_id=user.id AND job.id=job_id AND kwds.id=kwds_id AND role_id='$id'"
         );
@@ -169,18 +175,19 @@ class db {
 
     // Returns a list of rooms for a particular KWDS
     function get_rooms($id) {
-        return $this->query("SELECT name, room.id as RoomID FROM room WHERE kwds_id='$id' ORDER BY name");
+        return $this->query("SELECT name, id FROM room WHERE kwds_id='$id' ORDER BY name");
     }
 
     // Returns a SQL result list of all staff members of a particular KWDS
     function get_staff($num) {
         return $this->query(
-            "SELECT CONCAT(`username`,'(',`job`.`name`,')') as name, `role`.`role_id `as id, `job`.`name` AS JobName, `prefix`.`name` AS PrefixName,
-                `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, `title`.`name` AS Title, `user`.`email` AS UserEmail, `sca_first` AS SCAFirst, 
-                `sca_last` AS SCALast, `job`.`id` AS `JobID`, `role`.`user_id`
+            "SELECT CONCAT(`username`,'(',`job`.`name`,')') as name, `role`.`role_id` as id,
+                `job`.`name` AS JobName, `prefix`.`name` AS PrefixName, `user`.`first` AS MundaneFirst,
+                `user`.`last` AS MundaneLast, `title`.`name` AS Title, `user`.`email` AS UserEmail,
+                `sca_first` AS SCAFirst, `sca_last` AS SCALast, `job`.`id` AS `JobID`, `role`.`user_id` as UserID
             FROM `title`, `prefix`, `user`, `role`, `job`, `kwds`
-            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = `user_id` AND `job`.`id` = `job_id`
-                AND `kwds`.`id` = `kwds_id` AND `kwds`.`id` = $num
+            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = `user_id`
+                AND `job`.`id` = `job_id` AND `kwds`.`id` = `kwds_id` AND `kwds`.`id` = $num
             ORDER BY `job`.`id`"
         );
     }
@@ -188,8 +195,8 @@ class db {
     // Returns a list of teachers for a particular KWDS
     function get_teachers($id) {
         return $this->query(
-            "SELECT `user`.`id` AS UserID, `user`.`sca_first` AS SCAFirst, `user`.`sca_last` AS SCALast
-                `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, kwds_id, `class`.`id` AS ClassID
+            "SELECT `user`.`id` AS UserID, `user`.`sca_first` AS SCAFirst, `user`.`sca_last` AS SCALast,
+                `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, kwds_id, `class`.`id` AS ClassID,
                 `class`.`name` AS ClassName
             FROM `user`, `class`
             WHERE `user_id` = `user`.`id` and `kwds_id` = '$id'
@@ -199,7 +206,7 @@ class db {
 
     //Returns a list of classes that have not been scheduled yet
     function get_unscheduled_classes($num) {
-        return $this->query("SELECT * FROM class WHERE kwds_id='$num' AND (room_id IS NULL or room_id=0) ORDER BY name");
+        return $this->query("SELECT * FROM class WHERE kwds_id='$num' AND (room_id IS NULL OR room_id=0) ORDER BY name");
 
     }
 
@@ -248,13 +255,13 @@ class db {
     // Returns profile information for a particular user
     function get_user_info($id) {
         $return = $this->query(
-            "SELECT `user`.`id` AS UserID, `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast, `sca_first` AS SCAFirst, 
-                `sca_last` AS SCALast, `title`.`name` AS Title, `prefix`.`name` as PrefixName, `nickname`,
-                `email`, `group`.`name` AS GroupName, `group`.`url` AS GroupURL, `kingdom`.`name` AS KingdomName, 
-                `kingdom`.`url` AS KingdomURL, `about`
+            "SELECT `user`.`id` AS UserID, `user`.`first` AS MundaneFirst, `user`.`last` AS MundaneLast,
+                `sca_first` AS SCAFirst, `sca_last` AS SCALast, `title`.`name` AS Title,
+                `prefix`.`name` as PrefixName, `nickname`, `email`, `group`.`name` AS GroupName,
+                `group`.`url` AS GroupURL, `kingdom`.`name` AS KingdomName, `kingdom`.`url` AS KingdomURL, `about`
             FROM `user`, `group`, `title`, `prefix`, `kingdom`
-            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = '$id' AND `group`.`id` = `user`.`group_id`
-                AND `kingdom`.`id` = `group`.`kingdom_id`"
+            WHERE `title`.`id` = `title_id` AND `prefix`.`id` = `prefix_id` AND `user`.`id` = '$id' 
+                AND `group`.`id` = `user`.`group_id` AND `kingdom`.`id` = `group`.`kingdom_id`"
         );
         
         if ($return) return $return[0];
@@ -404,7 +411,7 @@ class db {
             WHERE (username='$username' OR email='$username') AND password='$pass'"
         );
         
-        if (count($result) > 0) {
+        if (count($result) == 1) {
             $session->login($result[0]['id'], $remember);
         }
         
@@ -417,7 +424,8 @@ class db {
 
         if ($result === TRUE || $result === FALSE) return $result; //Boolean on DML-type queries
         
-        if (is_null($result)) return array(); //Results are null if there are no rows.  Make it an empty array, to play nice with loops
+        //Results are null if there are no rows.  Make it an empty array, to play nice with loops
+        if (is_null($result)) return array();
         
         $return = array();
         for ($i = 0; $i < $result->num_rows; $i++) {

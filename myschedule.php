@@ -4,7 +4,7 @@
  */
 require_once('includes/header.php');
 ?>
-<h1>My Schedule for KWDS <?php echo $kwds['id']; ?></h1>
+<h1>My Schedule for KWDS <?php echo $kwds['KWID']; ?></h1>
 <?php
 if (!isset($_POST['checkboxes'])) {
     echo '<div class="box attention">You don\'t have any classes selected from the schedule.</div>';
@@ -13,7 +13,7 @@ if (!isset($_POST['checkboxes'])) {
     die;
 }
 $where="class.id='-1' ";
-echo '<form action="schedule.php?kwds='.$kwds['id'].'" method="post">';
+echo '<form class="form" action="schedule.php?kwds='.$kwds['KWID'].'" method="post">';
 
 foreach ($_POST as $key => $value) {
     echo '<input type="hidden" name="'.$key.'" value="'.$value.'" />';

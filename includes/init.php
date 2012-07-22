@@ -5,7 +5,8 @@
  * Initializes subsystems and sets up some default variables for use across all
  * pages.
  */
-ob_start(); //TODO: DELETE ME AFTER SEPARATING BUSINESS AND PRESENTATIONAL LOGIC!
+//ob_start(); //TODO: DELETE ME AFTER SEPARATING BUSINESS AND PRESENTATIONAL LOGIC!
+
 // Include and setup the database
 require('includes/db.class.php');
 $db=new db();

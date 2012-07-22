@@ -4,12 +4,12 @@
  */
 require_once('includes/header.php');
 // If you're not autocrat(or co-autocrat), you can't view this page
-if (!(is_autocrat($_SESSION['user_id'], $kwds['id']) && $kwds['id'] >= $db->get_kwds_number()) AND !is_super_user()) {
+if (!(is_autocrat($_SESSION['user_id'], $kwds['KWID']) && $kwds['KWID'] >= $db->get_kwds_number()) AND !is_super_user()) {
     echo '<div class="box error">You do not have permission to view this page.</div>';
     redirect('index.php');
     die;
 }
-$kwdsID=(isset($_POST['kwds']) AND $_POST['kwds']!="")? $_POST['kwds']:$kwds['id'];
+$kwdsID=(isset($_POST['kwds']) AND $_POST['kwds']!="")? $_POST['kwds']:$kwds['KWID'];
 
 // If the UPDATE button was pressed, do this
 if (isset($_POST['update'])){
@@ -23,7 +23,7 @@ if (isset($_POST['update'])){
         $job = $result['JobID'];
         $user = $result['user_id'];
     ?>
-<form class="form" action="staff.php?kwds=<?php echo $kwds['id'] ?>" method="post">
+<form class="form" action="staff.php?kwds=<?php echo $kwds['KWID'] ?>" method="post">
     <h1> Update User and Role</h1>
     <ul>
         <li><label>Job: </label>
@@ -68,7 +68,7 @@ elseif (isset($_POST['delete'])) {
         die;
     }
     echo '
-<form action="staff.php?kwds='.$kwds['id'].'" class="form" method="post">
+<form action="staff.php?kwds='.$kwds['KWID'].'" class="form" method="post">
     <p>Are you sure you want to remove '.  $result['username'].' as '.  $result['name'].'?</p>
     <input class="button" type="submit" name="delete" value="Yes" /><input class="button" type="submit" value="No" />
     <input type="hidden" name="deleted" value="'.$_POST['role'].'" />
@@ -83,7 +83,7 @@ elseif (isset($_POST['add'])) {
     echo '<div class="box success">A new member was added to your staff!</div>';
 }
 ?>
-<form class="form" action="staff.php?kwds=<?php echo $kwds['id'] ?>" method="post">
+<form class="form" action="staff.php?kwds=<?php echo $kwds['KWID'] ?>" method="post">
     <h1>Add a New Staff Member</h1>
     <ul>
         <li><label>Choose Job: </label>
@@ -110,7 +110,7 @@ if  ($_SESSION['user_id']==1) {
 
     <h1>Edit or Delete Existing Staff Members</h1>
     <?php
-    $jobs = $db->get_staff($kwds['id']);
+    $jobs = $db->get_staff($kwds['KWID']);
 ?>
     <ul>
         <li><label>Choose Staff Member:</label><?php dropdown($jobs, 'role')?></li>

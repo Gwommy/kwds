@@ -129,7 +129,7 @@ function edit_profile_form($edit) { ?>
             <?php echo 'value="'.$edit['sca_first'].'"';?> /></li>
         <li><label for="sca_last">SCA Last Name(s):</label><input type="text" name="sca_last" id="sca_last"
             <?php echo 'value="'.$edit['sca_last'].'"';?> /></li>
-        <li><label for="group_id">SCA Local Group:</label><?php $db= new db(); $result=$db->get_list('plce7673_kwds.group');
+        <li><label for="group_id">SCA Local Group:</label><?php $db= new db(); $result=$db->get_list('`group`');
             $index = $edit['group_id'];
             dropdown($result, "group_id", $index); ?></li>
     </ul>

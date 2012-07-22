@@ -6,7 +6,7 @@
  */
 require_once('includes/header.php');
 
-if ((is_autocrat($_SESSION['user_id'], $num) && $kwds['id'] >= $db->get_kwds_number()) || is_super_user()) {
+if ((is_autocrat($_SESSION['user_id'], $kwds['KWID']) && $kwds['KWID'] >= $db->get_kwds_number()) || is_super_user()) {
 
 ?>
 <script language="javascript" type="text/javascript">
@@ -26,7 +26,12 @@ if (isset($_POST['update'])) {
     echo '<div class="box success">The fee has been updated.</div>';
 }
 
+$desc="";
+$name="";
+$price="";
+$pre="";
 $type=1;
+
 if (isset($_POST['edit_num']) AND $_POST['edit_num']!='') {
     $result = $db->get_fee($_POST['edit_num']);
     if (count($result) > 0) {
@@ -47,14 +52,14 @@ if (isset($_POST['addfee'])) {
     }
     else {
         $pre=(isset($_POST['prereg'])?$_POST['prereg']:0);
-        $db->insert_fee($num, $_POST['name'], $_POST['price'], $_POST['description'], $pre, $_POST['type']);
+        $db->insert_fee($kwds['KWID'], $_POST['name'], $_POST['price'], $_POST['description'], $pre, $_POST['type']);
         echo '<div class="box success">The fee has successfully been added.</div>';
     }
 }
 
 echo '
 <h1>Add/Edit Site Fees</h1>
-<form action="fees.php?kwds='.$kwds['id'].'" method="post" class="form">
+<form action="fees.php?kwds='.$kwds['KWID'].'" method="post" class="form">
     <ul>
         <li><label>Enter Fee Title: </label><input type="textbox" name="name" value="'.$name.'" /></li>
         <li><label>Type of Fee: </label>';$result=$db->get_list('fee_type');dropdown($result, 'type', $type); echo '</li>
@@ -74,9 +79,9 @@ echo '
     echo '</ul>
 </form>';
 
-$result=$db->get_fees($kwds['id']);
+$result=$db->get_fees($kwds['KWID']);
 
-echo'<form action="fees.php?kwds='.$kwds['id'].'" method="post" class="form" id="edit_form">
+echo'<form action="fees.php?kwds='.$kwds['KWID'].'" method="post" class="form" id="edit_form">
     <input type="hidden" name="edit_num" id="edit_num" value="0" />';
 if (count($result) > 1) {
     foreach ($result as $row) {
@@ -91,7 +96,7 @@ if (count($result) > 1) {
             $pre="[Pre-registration Price]";
         }
         setlocale(LC_MONETARY, 'en_US');
-        echo '<div class="box info">'.$name.$pre.' - '.$type.' = '.money_format('%n', $price).' : '.$desc.
+        echo '<div class="box info">'.$name.$pre.' - '.$type.' = $'.number_format($price, 2).' : '.$desc.
                 '<div class="right"><input type="button" class="button" value="Edit" name="editfee" onclick="edit('.  $row['FeeID'].')" /></div></div>';
     }
 }

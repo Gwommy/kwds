@@ -5,7 +5,7 @@
 require_once('includes/header.php');
 
 // Make sure the user is logged in as a user that can edit the schedule
-if (!(can_add_rooms($_SESSION['user_id']) AND $kwds['id'] >= $db->get_kwds_number() OR is_super_user())) {
+if (!(can_add_rooms($_SESSION['user_id']) AND $kwds['KWID'] >= $db->get_kwds_number() OR is_super_user())) {
     echo 'div class="box error">You do not have permissions to view this page.</div>';
     redirect('index');
     include_once(includes/footer.php);
@@ -34,7 +34,7 @@ if (isset($_POST['class'])) {
 
 $cid = (isset($_GET['id'])) ? $_GET['id'] : 0;
 $result = $db->get_class($cid);
-if (count($result) == 1) {
+if (count($result) >0) {
     $class_name = $result['ClassName'];
     $desc = redisplay($result['ClassDescription']);
     $room = $result['RoomName'];
@@ -53,7 +53,7 @@ if (count($result) == 1) {
     $sca_name = $result['Title'] . ' ' . $result['SCAFirst'] . ' ' . $result['SCALast'];
     $mundane_name = $result['PrefixName'] . ' ' . $result['MundaneFirst'] . ' ' . $result['MundaneLast'];
 ?>
-<form class="form" action="class_schedule.php?kwds=<?php echo $kwds['id'] ?>" method="post">
+<form class="form" action="class_schedule.php?kwds=<?php echo $kwds['KWID'] ?>" method="post">
 <div class="class_info">
     <ul>
         <li><label for="name">Class Name:</label><input type="text" name="name"<?php echo 'value="'.$class_name.'"'; ?> /></li>
@@ -64,12 +64,12 @@ if (count($result) == 1) {
         <li><label for="aerobic">Aerobic Level:</label><?php $result=$db->get_list('aerobic'); dropdown($result, 'aerobic', $aero) ?></li>
         <li><label for="era">Time Period:</label><?php $result=$db->get_list('era'); dropdown($result, 'era', $era) ?></li>
         <li><label for="type">Type of Class:</label><?php $result=$db->get_list('type'); dropdown($result, 'type', $type) ?></li>
-        <li><label for="room">Room:</label><?php $result=$db->get_rooms($num); dropdown($result, 'room', $room_id) ?></li>
+        <li><label for="room">Room:</label><?php $result=$db->get_rooms($kwds['KWID']); dropdown($result, 'room', $room_id) ?></li>
         <li><label for="hours">Start Time:</label><?php dropdown_num('hour', 1, 12, 1,$hr); echo ' : '; dropdown_num('minute', 0, 55, 5, $min); ?></li>
         <li><label>Date: </label><?php get_event_dates($cdate); ?>
         <li><input type="submit" class="button" name="unschedule" value="Unschedule Class" /><input type="submit" class="button" name="class" value="Add to Schedule" /></li>
     </ul>
-    <input type="hidden" name="kwds" value="<?php echo $kwds['id']; ?>" />
+    <input type="hidden" name="kwds" value="<?php echo $kwds['KWID']; ?>" />
     <input type="hidden" name="cid" value="<?php echo $cid; ?>" />
 </div>
 </form>
@@ -87,7 +87,7 @@ if (count($result) == 1) {
 <?php
 $keday = (date('z', strtotime($kwds['end_date'])) - date('z', strtotime($kwds['start_date'])));
 for ($kday=0; $kday <= $keday; $kday++) {
-    $result = $db->get_rooms($kwds['id']);
+    $result = $db->get_rooms($kwds['KWID']);
     if (count($result) < 1) {
         echo '<p>There are no classes scheduled yet for day ' . ($kday + 1) . '.</p>';
     } else {
@@ -107,12 +107,12 @@ for ($kday=0; $kday <= $keday; $kday++) {
         foreach ($result as $row) {
             echo'
     <div>';
-            $rooms = $db->get_class_rooms($result['RoomID'], date('z', strtotime($kwds['start_date'])) + $kday + 2);
+            $rooms = $db->get_class_rooms($row['id'], date('z', strtotime($kwds['start_date'])) + $kday + 2);
             if (count($rooms) > 0) {
                 echo'
         <div class="th">' . $row['name'] . '</div>';
                 foreach ($rooms as $room) {
-                    echo '<a href="class_schedule.php?kwds=' . $kwds['id'] . '&id=' . $room['ClassID'] . '"><div class="class';
+                    echo '<a href="class_schedule.php?kwds=' . $kwds['KWID'] . '&id=' . $room['ClassID'] . '"><div class="class';
                     switch ($room['type_id']) {
                         case 2:
                             echo ' europ';
@@ -142,7 +142,7 @@ for ($kday=0; $kday <= $keday; $kday++) {
                     $thistime = strtotime($room['day']);
                     echo '" style="width:' . ($room['hours'] * 1.1) . 'px; position: absolute; margin-left: ' . $room['time'] . 'px;"
                         title="' . $room['description'] . '">
-                        <input class="mark" type="checkbox" /><div class="title">' . date('g:iA', $thistime) . ' ' . $room['name'] . '</div>
+                        <input class="mark" type="checkbox" /><div class="title">' . date('g:iA', $thistime) . ' ' . $room['ClassName'] . '</div>
                         <div class="user"> ' . $room['user'] . '</div></div></a>';
                 }
             }
@@ -154,11 +154,11 @@ for ($kday=0; $kday <= $keday; $kday++) {
     }
 }
 echo '<div class="schedule"><h2>Unscheduled Classes</h2>';
-$classes = $db->get_unscheduled_classes($kwds['id']);
+$classes = $db->get_unscheduled_classes($kwds['KWID']);
 
 if (count($classes) > 0) {
     foreach ($classes as $class) {
-                    echo '<a href="class_schedule.php?kwds=' . $kwds['id'] . '&id=' . $class['id'] . '"><div class="class';
+                    echo '<a href="class_schedule.php?kwds=' . $kwds['KWID'] . '&id=' . $class['id'] . '"><div class="class';
                     switch ($class['type_id']) {
                         case 2:
                             echo ' europ';

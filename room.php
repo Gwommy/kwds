@@ -21,9 +21,9 @@ if (isset($_SESSION['user_id']) AND can_add_rooms($_SESSION['user_id'])) {
         <li><label>Notes:</label> <textarea name="notes" cols="50" rows="5"></textarea></li>
         <?php if (is_super_user($_SESSION['user_id'])) {
             echo'
-        <li><label>KWDS:</label> <input type="number" name="kwds" value="'.$num.'" />';
+        <li><label>KWDS:</label> <input type="number" name="kwds" value="'.$kwds['KWID'].'" />';
         } else {
-            echo '<input type="hidden" name="kwds" value="'.$num.'" />';
+            echo '<input type="hidden" name="kwds" value="'.$kwds['KWID'].'" />';
         } ?>
         <li><label></label> <input type="submit" class="button" value="Add Room" /></li>
     </ul>

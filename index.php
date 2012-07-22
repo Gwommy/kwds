@@ -5,7 +5,7 @@
 require('includes/init.php');
 require('header.php');
 ?>
-    <h1 class="header"><a href="index.php?kwds=<?php echo $kwds['id']; ?>" title="Home">KWDS <? echo $kwds['id']; ?></a></h1>
+    <h1 class="header"><a href="index.php?kwds=<?php echo $kwds['KWID']; ?>" title="Home">KWDS <? echo $kwds['KWID']; ?></a></h1>
     <div class="entry">
         <div class="address">
             <h2><?php echo $kwds['name']; ?></h2>

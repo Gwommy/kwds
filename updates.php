@@ -22,7 +22,7 @@ if (isset($_POST['description']) && $_POST['description']!="") {
 $result = $db->get_updates();
 
 foreach ($result as $row) {
-    echo'<div><p><span class="bold">'.$result['username'].' ('.date('M j, Y', strtotime($result['date'])).')</span>: '.$result['description'].'</p></div>';
+    echo'<div><p><span class="bold">'.$row['username'].' ('.date('M j, Y', strtotime($row['date'])).')</span>: '.$row['description'].'</p></div>';
 }
 
 require('includes/footer.php'); ?>

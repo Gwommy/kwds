@@ -9,7 +9,7 @@ $cid = (isset($_GET['id'])) ? $_GET['id'] : 0;
 $result = $db->get_class($cid);
 
 // Get the class information and store it in variables
-if (count($result) == 1) {
+if (count($result) > 0) {
     $class_name = $result['ClassName'];
     $uid = $result['UserID'];
     $sca_name = $result['Title'] . ' ' . $result['SCAFirst'] . ' ' . $result['SCALast'];
@@ -40,19 +40,19 @@ $where="type_id>0";
 <script language="JavaScript" type="text/javascript">
 
     function form_submit(id) {
-        document.forms["class_form"].action="schedule.php?kwds=<?php echo $kwds['id']; ?>&id="+id;
+        document.forms["class_form"].action="schedule.php?kwds=<?php echo $kwds['KWID']; ?>&id="+id;
         document.forms["class_form"].submit();
     }
 
     function my_schedule() {
-        document.forms["class_form"].action="myschedule.php?kwds=<?php echo $kwds['id'];; ?>";
+        document.forms["class_form"].action="myschedule.php?kwds=<?php echo $kwds['KWID'];; ?>";
         document.getElementById("button").submit();
         //document.forms["class_form"].submit();
     }
 
 </script>
 <?php // Display the legend and the schedule ?>
-<h1>Schedule for KWDS <?echo roman($kwds['id']);?></h1>
+<h1>Schedule for KWDS <?echo roman($kwds['KWID']);?></h1>
 <form id="class_form" method="post">
 <div class="schedule legend">
     <div class="th"><u>Legend</u><br />Black is not rated</div>
@@ -72,7 +72,7 @@ $where="type_id>0";
 $kday = 0;
 $keday = (date('z', strtotime($kwds['end_date'])) - date('z', strtotime($kwds['start_date'])));
 for ($kday; $kday <= $keday; $kday++) {
-    $result = $db->get_rooms($kwds['id']);
+    $result = $db->get_rooms($kwds['KWID']);
 
     // Show message if there are no rooms submitted for this KWDS
     if (count($result) < 1) {
@@ -97,10 +97,10 @@ for ($kday; $kday <= $keday; $kday++) {
         foreach ($result as $row) {
             echo'
     <div class="tr">';
-            $rooms = $db->get_class_rooms($result['RoomID'], date('z', strtotime($kwds['start_date'])) + $kday + 2, $where);
+            $rooms = $db->get_class_rooms($row['RoomID'], date('z', strtotime($kwds['start_date'])) + $kday + 2, $where);
             if (count($rooms) > 0) {
                 echo'
-        <div class="th">' . mysql_result($result, $i, 'name') . '</div>';
+        <div class="th">' . $row['name'] . '</div>';
                 foreach ($rooms as $room) {
                         echo '<div class="class';
                         switch ($room['type_id']) {
@@ -133,10 +133,10 @@ for ($kday; $kday <= $keday; $kday++) {
                         echo '" style="width:' . ($room['hours'] * 1.1) . 'px; position: absolute; margin-left: ' . $room['time'] . 'px;"
                         title="' . $room['ClassName'] . ' - ' . $room['description'] . '">
                         <input class="mark" type="checkbox" name="c' . $room['ClassID'] . '" value="' . $room['ClassID'] . '"';
-                        if ($_POST['c' . $room['ClassID']] == $room['ClassID']) {
+                        if (isset($_POST['c' . $room['ClassID']]) AND $_POST['c' . $room['ClassID']] == $room['ClassID']) {
                             echo ' checked="checked"';
                         }
-                        echo ' /><a onclick="form_submit(' . $room['ClassID'] . ')"><div class="title">' . date('g:iA', $thistime) . ' ' . $room['name'] . '</div>
+                        echo ' /><a onclick="form_submit(' . $room['ClassID'] . ')"><div class="title">' . date('g:iA', $thistime) . ' ' . $room['ClassName'] . '</div>
                         <div class="user"> ' . $room['user'] . '</div></a></div>';
                 }
             }
@@ -150,11 +150,11 @@ for ($kday; $kday <= $keday; $kday++) {
 </form>
 <div class="schedule unschedule"><h2 class="unschedule">Unscheduled Classes</h2>
 <?php
-$classes = $db->get_unscheduled_classes($kwds['id']);
+$classes = $db->get_unscheduled_classes($kwds['KWID']);
 
 if (count($classes) > 0) {
     foreach ($classes as $class) {
-        echo '<a href="schedule.php?kwds=' . $kwds['id'] . '&id=' . $class['id'] . '"><div class="class';
+        echo '<a href="schedule.php?kwds=' . $kwds['KWID'] . '&id=' . $class['id'] . '"><div class="class';
         
         switch ($class['type_id']) {
             case 2:

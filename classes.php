@@ -6,7 +6,7 @@
 require_once('includes/header.php');
 
 echo'<h1>Classes</h1>';
-$result = $db->get_class_info($kwds['id']);
+$result = $db->get_class_info($kwds['KWID']);
 if (count($result) == 0) {
     echo'<p>There are no classes scheduled for this event yet.</p>';
 } else {
@@ -37,7 +37,7 @@ if (count($result) == 0) {
 </div>
         ';
     }
-    $result = $db->get_unscheduled_classes($kwds['id']);
+    $result = $db->get_unscheduled_classes($kwds['KWID']);
 
     if (count($result) > 0) {
         echo '

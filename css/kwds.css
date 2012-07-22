@@ -24,9 +24,7 @@ iframe {border: 2px solid #BF8941;}
 #banner {margin: 20px auto; text-align: center;}
 
 /***** HORIZONTAL MENU *****/
-.menu  { float: left; width: 953px; height: 30px; margin-left: 19px; padding: 0; display: inline; background: url(../images/menu_bg.gif) no-repeat; border-top: #61574a 3px double; text-align: center;
-    text-decoration: line-through;
-}
+.menu  { float: left; width: 953px; height: 30px; margin-left: 19px; padding: 0; display: inline; background: url(../images/menu_bg.gif) no-repeat; border-top: #61574a 3px double; text-align: center;}
 .menu ul { width: 100%; margin: 0; padding: 6px 0; list-style: none; text-align:center;}
 .menu ul li { display: inline; margin: 0px; }
 .menu ul li { padding: 0 0 0 10px; text-decoration: none; color: #000000; font-family: Times New Roman, Georgia, Sans-serif; font-variant: small-caps; font-weight: bold; font-size: 16px; }
@@ -88,7 +86,7 @@ body { margin: 0; font-size: 14px; text-align: center; vertical-align: top; back
 .teachers p {line-height: 20px; margin-top: -10px; margin-left: 40px;}
 
 /***** FORMS *****/
-.button {background-image: url('images/menu_bg.gif'); font-weight: bold;}
+.button {background-image: url('../images/menu_bg.gif'); font-weight: bold;}
 .form li {list-style: none; margin:5px;}
 .form label {width: 150px; display: inline-block; text-align: right; padding: 10px; vertical-align: top;}
 .form input {width: 250px; padding: 5px;}

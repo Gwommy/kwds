@@ -12,7 +12,7 @@ function can_add_rooms($id) {
 
     // Checks to see if you are on staff for the upcoming KWDS
     if (isset($_SESSION['user_id'])) {
-        $jobs = $db->get_user_job($_SESSION['user_id'], $kwds['id']);
+        $jobs = $db->get_user_job($_SESSION['user_id'], $kwds['KWID']);
 
         foreach ($jobs as $job){
             if (($job['id'] == 1 || $job['id'] == 2 || ($job['id'] >= 6 && $job['id'] <= 9))) {
